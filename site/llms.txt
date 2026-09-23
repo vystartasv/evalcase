@@ -1,0 +1,3 @@
+# evalcase
+
+Offline, deterministic evaluation of recorded agent outcomes. See https://vystartasv.github.io/evalcase/ and https://github.com/vystartasv/evalcase.
