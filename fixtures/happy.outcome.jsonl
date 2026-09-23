@@ -1,0 +1,4 @@
+{"type":"run_start","id":"run-1","case_id":"weather-summary","duration_ms":0}
+{"type":"tool_call","id":"call-1","step_id":"lookup","tool":"weather.lookup","arguments":{"city":"London"},"duration_ms":0}
+{"type":"tool_result","id":"result-1","call_id":"call-1","status":"success","result":{"temperature_c":18,"city":"London"},"duration_ms":42}
+{"type":"run_end","id":"run-end-1","status":"success","duration_ms":42}

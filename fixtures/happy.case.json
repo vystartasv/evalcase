@@ -1,0 +1,22 @@
+{
+  "id": "weather-summary",
+  "name": "Summarize weather lookup",
+  "input": {
+    "city": "London",
+    "locale": "en-GB"
+  },
+  "steps": [
+    {
+      "id": "lookup",
+      "tool": "weather.lookup",
+      "required_args": ["city"],
+      "result_status": "success",
+      "exact_result": {
+        "city": "London",
+        "temperature_c": 18
+      },
+      "max_duration_ms": 100,
+      "allow_failure": false
+    }
+  ]
+}
