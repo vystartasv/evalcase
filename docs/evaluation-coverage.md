@@ -2,7 +2,7 @@
 
 Inventory: `control-plane-mcp-v1` v1; 95 actions. Base schemas: `9c2c4499c9f9a1c1538af24d4f4519add12f1b59` in `internal/agentapi/actions.json`; all schema descriptions were synchronized against the current source tree.
 
-Coverage here means local pack definition and validation only. No action has fresh deployed run evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service; this gives all 95 operations safe local case coverage, including operations whose positive calls remain gated. Evalcase reports this separately from positive coverage and live-policy status. A separate batch guard rejects empty create/update arrays. Positive manual packs now cover all 18 read-only operations and 11 run-owned SharePoint CRUD/seed operations, two exact-job status reads, and the one-time confirmed site create. Seed continuation has a valid positive pack but requires a naturally interrupted job with untouched rows; no fault is injected to manufacture that recovery state. Tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
+Coverage here means local pack definition and validation. Nine core Control Plane reads now have fresh deployed manual-run evidence on SHA `5a79d6cded4978a0c7b52e2c6699d7b07a3a5f83`; SharePoint item/site operations remain without fresh positive evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service; this gives all 95 operations safe local case coverage, including operations whose positive calls remain gated. Evalcase reports this separately from positive coverage and live-policy status. A separate batch guard rejects empty create/update arrays. Positive manual packs cover all 18 read-only operations and 11 run-owned SharePoint CRUD/seed operations, two exact-job status reads, and the one-time confirmed site create. Seed continuation has a valid positive pack but requires a naturally interrupted job with untouched rows; no fault is injected to manufacture that recovery state. Tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
 
 ## Pack-defined positive coverage
 
@@ -15,8 +15,17 @@ Coverage here means local pack definition and validation only. No action has fre
 | `sharepoint-site-create-status.automation-pack.json` | `deployment_site_create_status` | locally validated; exact job ID only; remains gated for unrelated jobs; not live-verified |
 | `sharepoint-site-create.automation-pack.json` | `deployment_site_create` | locally validated; one-time exact URL/title/owner confirmation; not live-verified |
 | `sharepoint-site-read.automation-pack.json` | `deployment_site_lists`, `deployment_recycle_bin_assess` | locally validated; exact-site target; not live-verified |
-| `control-plane-readonly.automation-pack.json` | `work_list`, `automation_list`, `automation_templates`, `automation_inbox`, `settings_read`, `diagnostics_status`, `diagnostics_export`, `integrations_list`, `agents_list` | locally validated; service-scope target; not live-verified |
-| `control-plane-work-list.automation-pack.json` and `control-plane-readonly-remainder.automation-pack.json` | same nine reads split as one isolated `work_list` and an independent eight-action remainder | locally validated with separate matchers; lets a dispatcher regression in the first action leave the other read evidence runnable |
+| `control-plane-readonly.automation-pack.json` | `work_list`, `automation_list`, `automation_templates`, `automation_inbox`, `settings_read`, `diagnostics_status`, `diagnostics_export`, `integrations_list`, `agents_list` | locally validated; each action live-verified in the split workflows below |
+| `control-plane-work-list.automation-pack.json` and `control-plane-readonly-remainder.automation-pack.json` | same nine reads split as one isolated `work_list` and an independent eight-action remainder | locally validated with separate matchers; both ordinary manual runs succeeded and both matchers returned `yes=true` on deployed SHA `5a79d6c` |
+
+### Fresh manual read evidence
+
+| Target pack | Workflow ID | Run ID | Result |
+|---|---|---|---|
+| isolated `work_list` | `6c6f3980-9cf5-4eaf-90d9-35e1fd3aa9c7` | `automation-manual-cf142aff-362f-430c-8a9f-c0a68ac23784` | succeeded; `work_list` HTTP 200; matcher `control-plane-work-list` returned `yes=true` |
+| eight-action remainder | `7204b976-2250-464c-85b9-ee6c70b0fab9` | `automation-manual-b6b56d6b-222f-4f23-a3a5-3b87be7bf6e6` | succeeded; all eight actions HTTP 200; matcher `control-plane-readonly-remainder` returned `yes=true` |
+
+Both were ordinary manual workflows targeting `control-plane` / `automation-api` / `scope=workspace`, with no side effects. The deployed SHA was `5a79d6cded4978a0c7b52e2c6699d7b07a3a5f83`, deployed by [delivery run 43492449411](https://github.com/vystartasv/control-plane/actions/runs/43492449411). Earlier failed smoke runs remain in ordinary logs as failure evidence; no SharePoint site/list writes were part of these successful reads. The later `90aea3a` safe-read retry changes were not in this deployment.
 | `work-results-read.automation-pack.json` | `work_results` | locally validated; exact work-item target; not live-verified |
 | `feed-read.automation-pack.json` | `feed_read` | locally validated; exact subscriber target; not live-verified |
 
@@ -24,11 +33,11 @@ Coverage here means local pack definition and validation only. No action has fre
 
 ### read-only (18)
 
-- `work_list` — pack-defined-not-live-verified
+- `work_list` — live-verified (deployed `5a79d6c`; isolated manual read run)
 - `work_results` — pack-defined-not-live-verified
-- `automation_list` — pack-defined-not-live-verified
-- `automation_templates` — pack-defined-not-live-verified
-- `automation_inbox` — pack-defined-not-live-verified
+- `automation_list` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `automation_templates` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `automation_inbox` — live-verified (deployed `5a79d6c`; read-only remainder run)
 - `deployment_recycle_bin_assess` — pack-defined-not-live-verified
 - `deployment_list_changes` — pack-defined-not-live-verified
 - `deployment_site_lists` — pack-defined-not-live-verified
@@ -36,11 +45,11 @@ Coverage here means local pack definition and validation only. No action has fre
 - `deployment_list_items` — pack-defined-not-live-verified
 - `deployment_list_items_batch` — pack-defined-not-live-verified
 - `deployment_list_item_read` — pack-defined-not-live-verified
-- `settings_read` — pack-defined-not-live-verified
-- `diagnostics_status` — pack-defined-not-live-verified
-- `diagnostics_export` — pack-defined-not-live-verified
-- `integrations_list` — pack-defined-not-live-verified
-- `agents_list` — pack-defined-not-live-verified
+- `settings_read` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `diagnostics_status` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `diagnostics_export` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `integrations_list` — live-verified (deployed `5a79d6c`; read-only remainder run)
+- `agents_list` — live-verified (deployed `5a79d6c`; read-only remainder run)
 - `feed_read` — pack-defined-not-live-verified
 
 ### run-owned-resource-cleanup-required (11)
@@ -153,7 +162,7 @@ Cross-cutting checks: site and list IDs are explicit; Graph response bodies are 
 
 - Safe local case coverage: 95/95 operations have a schema-rejection case; this does not count as positive or live coverage.
 - Positive local pack definitions: 32 operations; this does not mean all 95 operations are positive or live-tested.
-- Live-verified operations: 0.
+- Live-verified operations: 9/95 total; 9/18 read-only operations.
 - `deployment_site_create` has a positive one-time pack, but its unique dedicated dev-site creation still requires the deployed workflow and exact target confirmation.
 - `deployment_list_seed` has a positive manual pack; its fresh-site run and exact-list cleanup are pending deployment confirmation.
 - `deployment_list_seed_continue` has a positive manual pack, but a live success requires an untouched pending row left by a genuine interrupted job. No such job is available, and no interruption will be manufactured.
