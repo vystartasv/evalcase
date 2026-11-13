@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import { demoData, evaluate, makeReport, parseCase, parseOutcome } from "../src/core.js";
+import { matchRunLog, parseRunMatcher } from "../src/run-matcher.js";
 
 const goodCase = {
   id: "case-1",
@@ -105,6 +106,24 @@ test("demo uses fixed data and no API key", () => {
   const result = evaluate(caseValue, events);
   assert.equal(result.status, "passed");
   assert.equal(result.duration_ms, 42);
+});
+
+test("run matcher returns a deterministic yes/no from ordinary automation run logs", () => {
+  const matcher = parseRunMatcher({
+    format: "evalcase.automation-run-matcher", version: 1, id: "sample",
+    run: { state: "succeeded", stepCount: 2 },
+    steps: [
+      { position: 0, action: "Call an API", state: "succeeded", replayMode: "repeatable-read", messageContains: "API call completed" },
+      { position: 1, action: "Combine API results", state: "succeeded", replayMode: "repeatable-stateless" }
+    ]
+  });
+  assert.ok(matcher);
+  const log = { runs: [{ id: "run-1", workflow_id: "workflow-1", state: "succeeded", steps: [
+    { position: 0, action: "Call an API", state: "succeeded", replay_mode: "repeatable-read", message: "API call completed." },
+    { position: 1, action: "Combine API results", state: "succeeded", replay_mode: "repeatable-stateless", message: "Combined 1 API results." }
+  ] }] };
+  assert.equal(matchRunLog(matcher, log).yes, true);
+  assert.equal(matchRunLog(matcher, { runs: [{ ...log.runs[0], state: "failed" }] }).yes, false);
 });
 
 test("tracked source contains no high-signal secret patterns", async () => {

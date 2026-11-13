@@ -1,0 +1,99 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-list-crud-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "SharePoint test list CRUD and recovery check",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "site",
+      "bindings": ["siteUrl", "listName", "renamedListName"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "list.create",
+        "operation": "deployment_site_list_create",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "displayName": {"$target": "listName"}, "columns": [], "confirmed": true},
+        "expectStatus": 201,
+        "capture": {"listId": "/id"}
+      },
+      {
+        "type": "integration-action",
+        "id": "list.columns.initial",
+        "operation": "deployment_list_columns",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}}
+      },
+      {
+        "type": "integration-action",
+        "id": "list.rename",
+        "operation": "deployment_site_list_rename",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "currentDisplayName": {"$target": "listName"}, "displayName": {"$target": "renamedListName"}, "confirmed": true},
+        "expectStatus": 200
+      },
+      {
+        "type": "integration-action",
+        "id": "list.columns.renamed",
+        "operation": "deployment_list_columns",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}}
+      },
+      {
+        "type": "integration-action",
+        "id": "item.create",
+        "operation": "deployment_list_item_create",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "fields": {"Title": "Evalcase temporary item"}, "confirmed": true},
+        "expectStatus": 201,
+        "capture": {"itemId": "/id"}
+      },
+      {
+        "type": "integration-action",
+        "id": "item.read.before-update",
+        "operation": "deployment_list_item_read",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "itemId": {"$capture": "item.create.itemId"}},
+        "expectStatus": 200,
+        "capture": {"itemId": "/id", "eTag": "/eTag"}
+      },
+      {
+        "type": "integration-action",
+        "id": "item.update",
+        "operation": "deployment_list_item_update",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "itemId": {"$capture": "item.read.before-update.itemId"}, "eTag": {"$capture": "item.read.before-update.eTag"}, "fields": {"Title": "Evalcase updated item"}, "confirmed": true},
+        "expectStatus": 200
+      },
+      {
+        "type": "integration-action",
+        "id": "item.read.before-delete",
+        "operation": "deployment_list_item_read",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "itemId": {"$capture": "item.create.itemId"}},
+        "expectStatus": 200,
+        "capture": {"itemId": "/id", "eTag": "/eTag"}
+      },
+      {
+        "type": "integration-action",
+        "id": "item.delete",
+        "operation": "deployment_list_item_delete",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "itemId": {"$capture": "item.read.before-delete.itemId"}, "eTag": {"$capture": "item.read.before-delete.eTag"}, "confirmed": true},
+        "expectStatus": 200
+      },
+      {
+        "type": "integration-action",
+        "id": "item.not-found",
+        "operation": "deployment_list_item_read",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "itemId": {"$capture": "item.create.itemId"}},
+        "expectStatus": 404
+      },
+      {
+        "type": "integration-action",
+        "id": "list.delete",
+        "operation": "deployment_site_list_delete",
+        "arguments": {"siteUrl": {"$target": "siteUrl"}, "listId": {"$capture": "list.create.listId"}, "currentDisplayName": {"$target": "renamedListName"}, "confirmed": true},
+        "expectStatus": 200
+      }
+    ]
+  }
+}

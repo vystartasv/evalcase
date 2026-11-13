@@ -38,8 +38,18 @@ The demo is fixed: it uses no API key, model, network, current timestamp, or age
 ```text
 evalcase check case.json outcome.jsonl
 evalcase report case.json outcome.jsonl [--json] [--output FILE]
+evalcase match-run matcher.json run-log.json [--json]
+evalcase automation-pack-check inventory.json automation-pack.json matcher.json [--json]
+evalcase automation-pack-import inventory.json automation-pack.json matcher.json [--output FILE]
+evalcase automation-pack-export inventory.json automation-pack.json matcher.json [--output FILE]
+evalcase pack-check inventory.json pack.json [--json]
+evalcase pack-import inventory.json pack.json
+evalcase pack-export inventory.json pack.json [--output FILE]
+evalcase surface-diff inventory.json human-surface.json [--json]
 evalcase demo
 ```
+
+`automation-pack-check` validates one ordinary manual backend automation and its separate deterministic matcher. `automation-pack-import` validates the portable pack and emits the workflow definition accepted by the existing `automation_workflow` API. `automation-pack-export` validates and writes the portable pack. These commands only read and write local files; they never call connected services or start runs. `pack-check`, `pack-import`, and `pack-export` retain the earlier operation inventory format for catalog coverage and migration. `surface-diff` compares a versioned human portal/backend inventory to the agent MCP action catalog and lists agent capability gaps.
 
 `check` prints stable human-readable output. `report --json` emits deterministic, JUnit-like JSON with `tests`, `failures`, `errors`, `testcases`, a summary, and diagnostics. `--output` writes only the explicitly requested report file.
 
@@ -86,6 +96,10 @@ The supported order is exactly `run_start`, then one `tool_call`/`tool_result` p
 - The CLI reads only the two named inputs. It writes nothing unless `report --output FILE` is explicitly supplied; normal reports go to stdout.
 - JSON values are treated as data. This tool is not a sandbox and does not make an untrusted agent safe.
 - Runtime dependencies are zero. TypeScript, Bun, and Node type packages are development-only.
+
+## Backend automation boundary
+
+The execution pack is a normal `automation_workflow` request with one manual trigger, a connected target binding, and ordered backend steps. The backend performs every operation through its existing action catalog and writes ordinary run and step logs. Control flow uses the same bounded conditions, repeats, delays, and timeouts available to workflows generally. The separate matcher artifact checks only those logs and emits `YES` or `NO`; it does not run operations, call an agent, or ask a model to judge results. Upload the automation through the existing automation API, invoke `automation_run` manually, wait for completion, inspect its run log, then pass that log and the matcher to `match-run`. No evaluation-specific API is involved. `examples/sharepoint-site-read.automation-pack.json` and `examples/sharepoint-site-read.matcher.json` demonstrate this format; replace the target binding with the exact authorized site at run time. The same structure supports email and future connected integrations when their action replay rules and separately controlled test destinations are defined.
 
 ## Local incumbent comparison
 

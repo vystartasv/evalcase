@@ -1,0 +1,19 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "sharepoint-list-crud-run-v1",
+  "run": {"state": "succeeded", "stepCount": 11},
+  "steps": [
+    {"position": 0, "action": "deployment_site_list_create", "state": "succeeded", "replayMode": "once-create", "messageContains": "HTTP 201"},
+    {"position": 1, "action": "deployment_list_columns", "state": "succeeded", "replayMode": "repeatable-read", "messageContains": "HTTP 200"},
+    {"position": 2, "action": "deployment_site_list_rename", "state": "succeeded", "replayMode": "once-update-etag-required", "messageContains": "HTTP 200"},
+    {"position": 3, "action": "deployment_list_columns", "state": "succeeded", "replayMode": "repeatable-read", "messageContains": "HTTP 200"},
+    {"position": 4, "action": "deployment_list_item_create", "state": "succeeded", "replayMode": "once-create", "messageContains": "HTTP 201"},
+    {"position": 5, "action": "deployment_list_item_read", "state": "succeeded", "replayMode": "repeatable-read", "messageContains": "HTTP 200"},
+    {"position": 6, "action": "deployment_list_item_update", "state": "succeeded", "replayMode": "once-update-etag-required", "messageContains": "HTTP 200"},
+    {"position": 7, "action": "deployment_list_item_read", "state": "succeeded", "replayMode": "repeatable-read", "messageContains": "HTTP 200"},
+    {"position": 8, "action": "deployment_list_item_delete", "state": "succeeded", "replayMode": "once-delete", "messageContains": "HTTP 200"},
+    {"position": 9, "action": "deployment_list_item_read", "state": "succeeded", "replayMode": "repeatable-read", "messageContains": "HTTP 404"},
+    {"position": 10, "action": "deployment_site_list_delete", "state": "succeeded", "replayMode": "once-delete", "messageContains": "HTTP 200"}
+  ]
+}

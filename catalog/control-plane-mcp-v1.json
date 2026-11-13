@@ -1,0 +1,4381 @@
+{
+  "format": "evalcase.mcp-operation-inventory",
+  "version": 1,
+  "id": "control-plane-mcp-v1",
+  "source": {
+    "repository": "vystartasv/control-plane",
+    "commit": "91e98f98ee979fc7c1113d93230a212dc4b07495",
+    "file": "internal/agentapi/actions.json",
+    "capturedAt": "2026-11-13",
+    "catalog": "connected MCP registry snapshot",
+    "note": "Operation names match the 98 tools exposed in the current connected MCP registry. Schemas and descriptions are copied from the corresponding local action definitions; exposed legacy sharepoint_eval_* wrappers are cataloged as gated, not used. deployment_site_uninstall exists only in the local uncommitted action file and is absent from the connected registry."
+  },
+  "actions": [
+    {
+      "name": "work_list",
+      "description": "List team requests, groups, templates, deliveries and accessible accounts.",
+      "path": "/api/work",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "work_results",
+      "description": "Read response results for a team request.",
+      "path": "/api/work",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "results"
+      ],
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "work_group",
+      "description": "Create or update a recipient group.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "name": {
+            "type": "string",
+            "description": "Group name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "members": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "description": "Recipient email address.",
+              "minLength": 1,
+              "maxLength": 254
+            }
+          }
+        },
+        "required": [
+          "name",
+          "members"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "group"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_create",
+      "description": "Create or edit a draft message, poll, approval or form. Polls require options; forms require questions. Sent requests cannot be edited.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "kind": {
+            "enum": [
+              "message",
+              "poll",
+              "approval",
+              "form"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "Request title.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "body": {
+            "type": "string",
+            "description": "Request message.",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90,
+            "default": 7
+          },
+          "options": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 12,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "description": "Poll option.",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "questions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Question label.",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "type": {
+                  "enum": [
+                    "text",
+                    "email",
+                    "number"
+                  ]
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "label",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "body",
+          "groupId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "create"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_send",
+      "description": "Send a draft to its recipient group by queueing invitations. Already sent drafts are not resent.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "send"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_close",
+      "description": "Close a request and cancel pending invitation deliveries.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "close"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_retry_mail",
+      "description": "Requeue one failed email delivery.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "retry-mail"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_save_template",
+      "description": "Save a reusable template from an existing request.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "name": {
+            "type": "string",
+            "description": "Template name; defaults to request title.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "save-template"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_use_template",
+      "description": "Create a draft from an enabled team template.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "use-template"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_template_enabled",
+      "description": "Enable or disable a team template.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this record is enabled."
+          }
+        },
+        "required": [
+          "id",
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "template-enabled"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_invite_account",
+      "description": "Invite a workspace member and deliver its sign-in email; administrator access required.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Invited email address.",
+            "minLength": 1,
+            "maxLength": 254
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "invite-account"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "work_account_enabled",
+      "description": "Enable or disable an invited member; administrator access required.",
+      "path": "/api/work",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Member email address.",
+            "minLength": 1,
+            "maxLength": 254
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this record is enabled."
+          }
+        },
+        "required": [
+          "email",
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "account-enabled"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_list",
+      "description": "List workflows, approved connections, subscribers, recent runs and notifications.",
+      "path": "/api/automation",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "automation_templates",
+      "description": "List starter workflow definitions. Fill their placeholders using available connections, groups and team templates before calling automation_workflow.",
+      "path": "/api/automation?templates=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "automation_connection",
+      "description": "Create an HTTPS API connection on an administrator-approved host. Credential is an existing environment variable reference, never its secret value.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique connection name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "POST"
+            ]
+          },
+          "credential": {
+            "type": "string",
+            "pattern": "^PORTAL_API_SECRET_[A-Z0-9_]+$"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "connection"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_preview",
+      "description": "Validate a proposed workflow without saving it. For edits, pass its id to review configured failure recipients too. Returns trigger, validated steps, concrete side effects, and failure notification routes. Present effects and recipients before enabling or running.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "name": {
+            "type": "string",
+            "description": "Workflow name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Event trigger type; omit for a schedule.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "intervalMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 525600
+          },
+          "eventItemId": {
+            "type": "string",
+            "description": "Optional team request filter; cannot combine with eventTemplateId.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "eventTemplateId": {
+            "type": "string",
+            "description": "Optional team template filter; requires a team event and cannot combine with eventItemId.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "notifyOn": {
+            "enum": [
+              "always",
+              "failure"
+            ],
+            "default": "always"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "start-team-template"
+                    },
+                    "templateId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "templateId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "deploy-package"
+                    },
+                    "packageId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "packageId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "email-group"
+                    },
+                    "groupId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "subject": {
+                      "type": "string",
+                      "description": "Email subject.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Email message.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "groupId",
+                    "subject",
+                    "message"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "call-api"
+                    },
+                    "connection": {
+                      "type": "string",
+                      "description": "Existing approved API connection name.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "connection"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "notify"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Notification message.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "message"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "aggregate"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "summarize"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "workflow-preview"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_inbox",
+      "description": "Read failure alerts addressed to this currently authorized agent identity. Alerts contain a safe run reference and never grant access beyond the Owner-approved role.",
+      "path": "/api/automation?inbox=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "automation_inbox_read",
+      "description": "Mark an alert addressed to this identity as read. This does not retry a workflow or change access.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Notification ID from automation_inbox.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "failure-notification-read"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_failure_recipients",
+      "description": "Set up to 10 authorized human or active Owner-approved agent recipients for workflow failure alerts. Rechecks identity status when alerting; does not grant access.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "adminOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workflowId": {
+            "type": "string",
+            "description": "Existing workflow ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "recipients": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "human",
+                    "agent"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "workflowId",
+          "recipients"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "failure-recipients"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_workflow",
+      "description": "Create or edit any workflow expressible by the available capability catalog: inspect automation_list, starter templates and available dependencies first, compose 1–10 supported steps, run automation_preview, explain concrete effects and failure recipients, then save paused unless activation is explicitly requested. Report a missing capability clearly; never substitute arbitrary code. Deployment steps require administrator access. Summary steps require server-configured OpenAI credentials and model.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "name": {
+            "type": "string",
+            "description": "Workflow name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Event trigger type; omit for a schedule.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "intervalMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 525600
+          },
+          "eventItemId": {
+            "type": "string",
+            "description": "Optional team request filter; cannot combine with eventTemplateId.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "eventTemplateId": {
+            "type": "string",
+            "description": "Optional team template filter; requires a team event and cannot combine with eventItemId.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "notifyOn": {
+            "enum": [
+              "always",
+              "failure"
+            ],
+            "default": "always"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "start-team-template"
+                    },
+                    "templateId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "templateId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "deploy-package"
+                    },
+                    "packageId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "packageId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "email-group"
+                    },
+                    "groupId": {
+                      "type": "string",
+                      "description": "Existing record ID.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "subject": {
+                      "type": "string",
+                      "description": "Email subject.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Email message.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "groupId",
+                    "subject",
+                    "message"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "call-api"
+                    },
+                    "connection": {
+                      "type": "string",
+                      "description": "Existing approved API connection name.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "connection"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "notify"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Notification message.",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "message"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "aggregate"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "summarize"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              ]
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Optional. Set false to save paused; omission preserves current behavior and creates new schedules enabled."
+          }
+        },
+        "required": [
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "workflow",
+        "action": "steps"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_subscribe",
+      "description": "Create an in-app notification subscriber or route to a configured webhook channel, optionally limited to one workflow. Failure notices go only to enabled matching subscribers.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Subscriber name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "webhook": {
+            "type": "string",
+            "description": "Configured webhook channel name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "workflowId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "subscribe"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_workflow_enabled",
+      "description": "Enable or pause a workflow. Before enabling, present the workflow preview side effects and confirm the user wants its schedule or event trigger active.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this record is enabled."
+          }
+        },
+        "required": [
+          "id",
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "workflow-enabled"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_subscriber_enabled",
+      "description": "Enable or disable a notification subscriber.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this record is enabled."
+          }
+        },
+        "required": [
+          "id",
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "subscriber-enabled"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_read",
+      "description": "Mark a notification as read.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "read"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "automation_run",
+      "description": "Queue an enabled scheduled workflow for the next worker cycle. Before running, present its workflow preview side effects and confirm the user requested this run.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "run"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "deployment_list",
+      "description": "List stored packages, blueprints, deployment and copy jobs, and connection verification status.",
+      "path": "/api/deployments",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_site_catalogs",
+      "description": "Read a page of site collection app catalogs listed in the connected tenant app catalog. Use the returned continuation cursor to read later pages. Only same-host site URLs are returned; SharePoint is not changed.",
+      "path": "/api/deployments/site-catalogs",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Optional continuation cursor from the previous page.",
+            "maxLength": 8192
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "query": [
+        "cursor"
+      ],
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_recycle_bin_assess",
+      "description": "Read one page of recycle-bin entries for one existing site collection on the verified SharePoint host. Returns item names, paths, dates, sizes, first/second-stage labels and per-page stage counts/bytes. Use its cursor for more pages. Does not restore, delete or purge items.",
+      "path": "/api/deployments/recycle-bin",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Exact HTTPS site collection URL to assess on the connected SharePoint host.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Optional continuation cursor from the previous page.",
+            "maxLength": 8192
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "cursor"
+      ],
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_list_changes",
+      "description": "Read one page of changed items from one SharePoint list using Microsoft Graph delta. The first call captures a current baseline without enumerating existing list items; continue with the cursor and keep it for future polling. Returns only item ID, ETag, last-modified time and deletion status. An item may repeat; use its last state. Delta reports latest state, not every intermediate event.",
+      "path": "/api/deployments/list-changes",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL containing the list, on the connected SharePoint host.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "description": "Exact SharePoint list GUID to monitor.",
+            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Optional opaque cursor returned by the previous call for this exact site and list.",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "listId",
+        "cursor"
+      ],
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_site_lists",
+      "description": "Read one bounded page of list IDs and display names from one exact existing SharePoint site on the verified host. Continue with its site-bound cursor to find a list GUID for monitoring. Does not change SharePoint.",
+      "path": "/api/deployments/site-lists",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Exact HTTPS URL of an existing site on the connected SharePoint host.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Optional opaque continuation cursor returned for this exact site.",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "cursor"
+      ],
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_site_list_create",
+      "description": "Create one generic SharePoint list on one exact existing site after administrator confirmation. Optionally create up to 20 single-line text columns with the list. The backend verifies the list and requested columns before reporting success; returned column API names can be used to populate items. Inspect the exact site before retrying an uncertain result.",
+      "path": "/api/deployments/site-lists",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "columns": {
+            "type": "array",
+            "maxItems": 20,
+            "uniqueItems": true,
+            "description": "Optional display names for single-line text columns to create with the list. The response returns each column API name for item population.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after the administrator confirms the exact site, list name and optional columns."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "displayName",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list",
+        "effect": "create"
+      }
+    },
+    {
+      "name": "deployment_site_list_rename",
+      "description": "Rename one exact SharePoint list after confirming its current display name. The backend verifies the current name and reads back the new one.",
+      "path": "/api/deployments/site-lists",
+      "method": "PATCH",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currentDisplayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "currentDisplayName",
+          "displayName",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list",
+        "effect": "update"
+      }
+    },
+    {
+      "name": "deployment_site_list_delete",
+      "description": "Delete one exact SharePoint list after confirming its current display name. The backend checks the name before deletion and verifies that the list is gone.",
+      "path": "/api/deployments/site-lists",
+      "method": "DELETE",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currentDisplayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "currentDisplayName",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list",
+        "effect": "delete"
+      }
+    },
+    {
+      "name": "deployment_list_columns",
+      "description": "Read one bounded page of field metadata from one exact existing SharePoint list. Returns API/display names, supported type facets and available choice, length, range or date-format constraints, plus required/read-only/hidden flags. Use its cursor for more columns. Does not read or change list items.",
+      "path": "/api/deployments/list-columns",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "listId",
+        "cursor"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_list_column_create",
+      "description": "Create one single-line or plain multi-line text, single-choice, number, currency, date-time or Boolean (Yes/No) column on one exact existing SharePoint list. Multi-line text uses a plain-text editor with six visible lines. Choice columns require 1–20 distinct values and can optionally allow fill-in values. Number columns can have optional inclusive minimum and maximum values. Currency columns use SharePoint's default currency settings. Date-time columns can use a date-only or date-and-time display format. Boolean columns default to No unless defaultValue is confirmed as true. Set required to true to require a value on new items; it defaults to false. Confirm the exact site, list and complete column definition; inspect the columns before retrying an uncertain result.",
+      "path": "/api/deployments/list-columns",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "multiLineText",
+              "choice",
+              "number",
+              "currency",
+              "dateTime",
+              "boolean"
+            ],
+            "description": "Omit or use text for a 255-character single-line field; use multiLineText for plain text content with multiple lines. Use choice for a single-select list of options, number for a numeric field, currency for a monetary value in the site's default currency format, dateTime for a date field or boolean for a Yes/No field."
+          },
+          "choices": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "description": "Required for type=choice; values must be distinct and have no leading/trailing whitespace or control characters."
+          },
+          "allowTextEntry": {
+            "type": "boolean",
+            "description": "For a choice column only, allow fill-in values beyond the listed choices. Defaults to false."
+          },
+          "minimum": {
+            "type": "number",
+            "description": "Optional inclusive minimum for a number column; must be finite and no greater than maximum."
+          },
+          "maximum": {
+            "type": "number",
+            "description": "Optional inclusive maximum for a number column; must be finite and no less than minimum."
+          },
+          "dateTimeFormat": {
+            "type": "string",
+            "enum": [
+              "dateOnly",
+              "dateTime"
+            ],
+            "description": "For type=dateTime, use dateOnly for dates without a time or dateTime for dates and times. Defaults to dateTime."
+          },
+          "defaultValue": {
+            "type": "boolean",
+            "description": "For type=boolean only, set the Yes/No default. Omit or use false for No; use true for Yes."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Require a value when creating list items. Defaults to false."
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact site, list and column name."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "displayName",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-column",
+        "effect": "create",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_site_create",
+      "description": "Queue one modern SharePoint Communication or non-group Team site on the verified tenant. Confirm the exact unused non-root URL, title, template, owner, description and current connection version in both the request and confirmation. A canonical URL is reserved to one durable job; uncertain or interrupted creates are never repeated. Use deployment_site_create_status to inspect progress before taking action.",
+      "path": "/api/deployments/site-create",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "siteUrl": {
+            "type": "string",
+            "format": "uri",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "template": {
+            "type": "string",
+            "enum": [
+              "SITEPAGEPUBLISHING#0",
+              "STS#3"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "format": "email",
+            "minLength": 3,
+            "maxLength": 254
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "confirmation": {
+            "type": "object",
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "siteUrl": {
+                "type": "string",
+                "format": "uri",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "template": {
+                "type": "string",
+                "enum": [
+                  "SITEPAGEPUBLISHING#0",
+                  "STS#3"
+                ]
+              },
+              "owner": {
+                "type": "string",
+                "format": "email",
+                "minLength": 3,
+                "maxLength": 254
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 1024
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "title",
+              "siteUrl",
+              "template",
+              "owner",
+              "description"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "title",
+          "siteUrl",
+          "template",
+          "owner",
+          "description",
+          "confirmed",
+          "confirmation"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "one-time-confirmed-target-required",
+      "resource": {
+        "kind": "sharepoint-site",
+        "effect": "create"
+      }
+    },
+    {
+      "name": "deployment_site_create_status",
+      "description": "Read the latest 20 durable site-creation jobs or the status of one job. Set inspect=true to read provisioning status for one needs-review job from the verified SharePoint admin host. This action is read-only. Status 0 is Not Found; other statuses or read errors do not allow continuation.",
+      "path": "/api/deployments/site-create",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspect": {
+            "type": "string",
+            "enum": [
+              "true"
+            ],
+            "description": "Set to true to read the exact saved URL's SharePoint provisioning status for a needs-review job."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "query": [
+        "jobId",
+        "inspect"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_site_create_continue",
+      "description": "Manually continue one needs-review site-create job only after deployment_site_create_status with inspect=true definitively returned SiteStatus 0 (Not Found). Reconfirm the same job, exact URL, title, template, owner, description and current connection version. The backend repeats a read-only status check before requeueing the same reserved job. Status 1, 2, 3 or 4 and any read error remain needs-review.",
+      "path": "/api/deployments/site-create/continue",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "siteUrl": {
+            "type": "string",
+            "format": "uri",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "template": {
+            "type": "string",
+            "enum": [
+              "SITEPAGEPUBLISHING#0",
+              "STS#3"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "format": "email",
+            "minLength": 3,
+            "maxLength": 254
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "confirmation": {
+            "type": "object",
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "siteUrl": {
+                "type": "string",
+                "format": "uri",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "template": {
+                "type": "string",
+                "enum": [
+                  "SITEPAGEPUBLISHING#0",
+                  "STS#3"
+                ]
+              },
+              "owner": {
+                "type": "string",
+                "format": "email",
+                "minLength": 3,
+                "maxLength": 254
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 1024
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "title",
+              "siteUrl",
+              "template",
+              "owner",
+              "description"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "jobId",
+          "title",
+          "siteUrl",
+          "template",
+          "owner",
+          "description",
+          "confirmed",
+          "confirmation"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "one-time-confirmed-target-required",
+      "resource": {
+        "kind": "sharepoint-site",
+        "effect": "update"
+      }
+    },
+    {
+      "name": "deployment_list_seed",
+      "description": "Queue creation of one exact-site generic list with up to 20 text columns and 1–20 initial rows. Confirm the site, list name, schema and every row. The worker persists the verified list ID before validating all rows and creating any item; each row outcome is stored independently. An uncertain list-create result is never repeated. Use deployment_list_seed_status to inspect progress.",
+      "path": "/api/deployments/list-seed",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "columns": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 100
+            }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact site, list name, text columns and every initial row."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "displayName",
+          "columns",
+          "items",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list",
+        "effect": "create"
+      }
+    },
+    {
+      "name": "deployment_list_seed_status",
+      "description": "Read the latest 20 list-seed jobs and per-row outcomes, or pass one jobId for exact status. Returns the exact site and persisted list ID without field values. Use this to recover a job after a page reload before continuing only untouched rows.",
+      "path": "/api/deployments/list-seed",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "query": [
+        "jobId"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_list_seed_continue",
+      "description": "Continue only untouched pending rows for a list-seed job whose exact list ID was durably saved. Confirm the job ID, site URL and list ID. Succeeded and uncertain rows are never repeated; a job without a verified persisted list ID cannot be continued.",
+      "path": "/api/deployments/list-seed/continue",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming this job's exact site and persisted list ID."
+          }
+        },
+        "required": [
+          "jobId",
+          "siteUrl",
+          "listId",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "create",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_list_items",
+      "description": "Read one page of up to 50 items from one exact existing SharePoint site and list, including ETags. Omit fields to read all returned field values, or select 1–20 visible column API names from deployment_list_columns. Optionally filter one visible text or choice column with eq, ne or startswith; number or currency with eq, ne, lt, gt, le or ge; boolean with eq or ne; or dateTime columns with eq, ne, lt, gt, le or ge. The returned cursor preserves projection and filter and remains bound to the exact site and list. Content is returned only to a full administrator.",
+      "path": "/api/deployments/list-items",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "fields": {
+            "type": "string",
+            "maxLength": 4096,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*(,[A-Za-z_][A-Za-z0-9_]*){0,19}$",
+            "description": "Comma-separated exact column API names. Omit on cursor continuation; the cursor retains the projection."
+          },
+          "filterField": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "description": "Exact visible supported text, choice, number, currency, boolean or dateTime column API name; provide with filterOperator and filterValue on the first page only."
+          },
+          "filterOperator": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "ne",
+              "lt",
+              "gt",
+              "le",
+              "ge",
+              "startswith"
+            ]
+          },
+          "filterValue": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Text/choice literal, finite decimal number, lowercase true/false, or RFC3339 timestamp according to the selected column type."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "listId",
+        "cursor",
+        "fields",
+        "filterField",
+        "filterOperator",
+        "filterValue"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_list_items_batch",
+      "description": "Read up to 20 exact list items in one Microsoft Graph JSON batch from the verified SharePoint connection. Each target contains an exact site URL, list ID and item ID. Results retain input order and include individual status and Retry-After values, so a failed or throttled item does not hide successful reads. This operation is read-only.",
+      "path": "/api/deployments/list-items/batch",
+      "method": "POST",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "targets": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "siteUrl": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "listId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "itemId": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,19}$"
+                }
+              },
+              "required": [
+                "siteUrl",
+                "listId",
+                "itemId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "targets"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_list_items_batch_create",
+      "description": "Create 1–20 items in one exact SharePoint list after the administrator confirms the site, list and all submitted field values. Required, hidden and read-only column rules are checked before any write. Each result includes its independent status and successful items are read back before success. Batch writes may trigger list workflows; inspect uncertain results before retrying.",
+      "path": "/api/deployments/list-items/batch-create",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 100,
+              "additionalProperties": true
+            }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact site, list and every submitted item value."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "items",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "create",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_list_items_batch_update",
+      "description": "Update 1–20 distinct items in one exact SharePoint list after the administrator confirms every item ID, current ETag and field map. Required, hidden and read-only column rules are checked before any write. Each successful item is read back and verified. Per-item failures remain independent; inspect uncertain outcomes before retrying.",
+      "path": "/api/deployments/list-items/batch-update",
+      "method": "PATCH",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,19}$"
+                },
+                "eTag": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "fields": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "maxProperties": 100,
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "itemId",
+                "eTag",
+                "fields"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact site, list, item IDs, current ETags and every submitted field value."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "items",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "update",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_list_item_read",
+      "description": "Read the current fields and ETag for one exact SharePoint list item. Use that ETag when later updating or deleting the item.",
+      "path": "/api/deployments/list-item",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "itemId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "siteUrl",
+        "listId",
+        "itemId"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "deployment_list_item_create",
+      "description": "Create one item in the exact site and list after the administrator confirms the target and field values. Required, hidden and read-only column rules are checked. This may trigger the list's change workflows; inspect an uncertain outcome before retrying.",
+      "path": "/api/deployments/list-items",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fields": {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 100,
+            "additionalProperties": true
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact site, list and submitted field values."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "fields",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "create",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_list_item_update",
+      "description": "Update fields on one exact item after the administrator confirms the site, list, item and changes. Supply the current ETag from a recent read; stale items are rejected. This may trigger the list's change workflows; inspect an uncertain outcome before retrying.",
+      "path": "/api/deployments/list-item",
+      "method": "PATCH",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          },
+          "eTag": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "fields": {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 100,
+            "additionalProperties": true
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming the exact item and submitted field changes."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "itemId",
+          "eTag",
+          "fields",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "update",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "deployment_list_item_delete",
+      "description": "Delete one exact list item after the administrator confirms its site, list, item ID and current ETag. Deletion is conditional on that ETag and the backend verifies that the item is absent. This may trigger the list's change workflows. Do not retry an uncertain outcome without inspecting the list.",
+      "path": "/api/deployments/list-item",
+      "method": "DELETE",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          },
+          "eTag": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set true only after confirming deletion of this exact item."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "itemId",
+          "eTag",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "run-owned-resource-cleanup-required",
+      "resource": {
+        "kind": "sharepoint-list-item",
+        "effect": "delete",
+        "parentKind": "sharepoint-list"
+      }
+    },
+    {
+      "name": "sharepoint_eval_packs",
+      "description": "List imported manual SharePoint workflow packs. Importing never runs a workflow.",
+      "path": "/api/deployments/evaluations/packs",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_eval_pack_import",
+      "description": "Upload a strict declarative SharePoint workflow pack. Only bounded typed list and item operations plus captured-value assertions are accepted; no code, schedules, notifications, email, API calls or other external effects are supported. Import never runs the workflow.",
+      "path": "/api/deployments/evaluations/packs",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workflow": {
+            "type": "object",
+            "properties": {
+              "trigger": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "const": "manual"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 9,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40,
+                      "pattern": "^[A-Za-z0-9_-]+$"
+                    },
+                    "type": {
+                      "enum": [
+                        "sharepoint.list.create",
+                        "sharepoint.list-item.create",
+                        "sharepoint.list-item.read",
+                        "sharepoint.list-item.update",
+                        "sharepoint.list-item.delete",
+                        "assert.equals",
+                        "assert.not-found"
+                      ]
+                    },
+                    "capture": {
+                      "type": "string",
+                      "enum": [
+                        "list",
+                        "item",
+                        "created",
+                        "updated"
+                      ]
+                    },
+                    "item": {
+                      "const": "item"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "Title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "Title"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "source": {
+                      "enum": [
+                        "created.fields.Title",
+                        "updated.fields.Title"
+                      ]
+                    },
+                    "field": {
+                      "const": "Title"
+                    },
+                    "equals": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "trigger",
+              "steps"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "workflow"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_eval_pack_export",
+      "description": "Export one exact portable SharePoint evaluation pack by ID.",
+      "path": "/api/deployments/evaluations/packs",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "packId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "packId"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_eval_run",
+      "description": "After explicitly confirming one exact connected dev site, manually run its imported declarative SharePoint workflow. The bounded workflow creates one run-owned list and item, checks captured readbacks, updates and deletes the item, confirms not-found, then deletes only its own list. Uncertain outcomes require review. No schedule is created.",
+      "path": "/api/deployments/evaluations/runs",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Confirm this exact target site and temporary CRUD test writes."
+          }
+        },
+        "required": [
+          "packId",
+          "siteUrl",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_eval_run_read",
+      "description": "Read step results for one exact evaluation run.",
+      "path": "/api/deployments/evaluations/runs",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "runId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "runId"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_upload",
+      "description": "Upload an SPFx .sppkg ZIP package, 4 bytes–50 MiB decoded, and its solution ID from the manifest.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "base64": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "description": "Base64-encoded package bytes, at most 50 MiB decoded."
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[\\w .-]{1,100}\\.sppkg$"
+          },
+          "appId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          }
+        },
+        "required": [
+          "base64",
+          "name",
+          "appId"
+        ],
+        "additionalProperties": false
+      },
+      "upload": true,
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_blueprint_save",
+      "description": "Save a blueprint of 1–20 pages, at most 60,000 bytes total.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Blueprint name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "pages": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Page title.",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Page text.",
+                  "minLength": 1,
+                  "maxLength": 20000
+                }
+              },
+              "required": [
+                "title",
+                "content"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "pages"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "blueprint-save"
+      },
+      "deployOnly": false,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_blueprint_plan",
+      "description": "Prepare a blueprint copy plan for an existing destination site; review its pages before starting.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "blueprintId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "destinationUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "blueprintId",
+          "destinationUrl"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "blueprint-plan"
+      },
+      "deployOnly": false,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_copy_plan",
+      "description": "Prepare a page copy plan between two different SharePoint sites; review the source page list before starting.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sourceUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "destinationUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "sourceUrl",
+          "destinationUrl"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "page-copy"
+      },
+      "deployOnly": false,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_copy_start",
+      "description": "Start a reviewed copy job using selected planned page IDs. The job must await review and match the current connection.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "pageIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "description": "Existing record ID.",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          }
+        },
+        "required": [
+          "jobId",
+          "pageIds"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "page-copy-start"
+      },
+      "deployOnly": false,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_copy_continue",
+      "description": "Continue a copy job in needs-review state after reviewing its current status.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "jobId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "page-copy-continue"
+      },
+      "deployOnly": false,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_page",
+      "description": "Queue a draft article page after confirming its exact site, title, connection version and exact content or ordered components. Use plain-text components plus the supported Graph Divider OOTB component; raw HTML, raw canvas data and custom SPFx parts are not accepted. The worker reads back the full canvas before reporting success.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "title": {
+            "type": "string",
+            "description": "Page title.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "components": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "divider"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 20000
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "confirmation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "description": "Existing record ID.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "siteUrl": {
+                "type": "string",
+                "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "title": {
+                "type": "string",
+                "description": "Exact target title.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "components": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "divider"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 20000
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "siteUrl",
+              "title"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "content"
+                ]
+              },
+              {
+                "required": [
+                  "components"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "siteUrl",
+          "title",
+          "confirmation"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "content"
+            ]
+          },
+          {
+            "required": [
+              "components"
+            ]
+          }
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "page"
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_page_status",
+      "description": "Read-only inspection of one needs-review draft page job against its exact saved SharePoint site, title, ordered components and current connection. Returns verified, not-found or mismatch; a read error leaves the job unchanged.",
+      "path": "/api/deployments/page-status",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "jobId"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "jobId"
+      ],
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_page_reconcile",
+      "description": "Manually reconcile one needs-review page job only after exact full-canvas readback matches and the full saved site, title, content or ordered components, and current connection version are reconfirmed. This updates local job status only and never creates a SharePoint page.",
+      "path": "/api/deployments/page-reconcile",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "confirmation": {
+            "type": "object",
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "siteUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "components": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "divider"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 20000
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "siteUrl",
+              "title"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "content"
+                ]
+              },
+              {
+                "required": [
+                  "components"
+                ]
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "jobId",
+          "confirmed",
+          "confirmation"
+        ],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_site_install",
+      "description": "Queue installation of a stored SPFx package on one confirmed site after checking its deployed catalog version. This does not enable tenant-wide deployment.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "siteUrl": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL on the connected catalog host.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "confirmation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "description": "Existing record ID.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "packageId": {
+                "type": "string",
+                "description": "Existing record ID.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "packageName": {
+                "type": "string",
+                "description": "Exact stored package name.",
+                "minLength": 1,
+                "maxLength": 106
+              },
+              "solutionId": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Microsoft Entra or package manifest GUID."
+              },
+              "catalog": {
+                "type": "string",
+                "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "siteUrl": {
+                "type": "string",
+                "description": "Exact target site URL.",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "packageId",
+              "packageName",
+              "solutionId",
+              "catalog",
+              "siteUrl"
+            ]
+          }
+        },
+        "required": [
+          "packageId",
+          "siteUrl",
+          "confirmation"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "site-install"
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "deployment_package",
+      "description": "Queue a stored package deployment after confirming its exact catalog, solution, package and connection version from the current snapshot.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "confirmation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "connectionVersion": {
+                "type": "string",
+                "description": "Existing record ID.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "packageId": {
+                "type": "string",
+                "description": "Existing record ID.",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "catalog": {
+                "type": "string",
+                "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "packageName": {
+                "type": "string",
+                "description": "Exact stored package name.",
+                "minLength": 1,
+                "maxLength": 106
+              },
+              "solutionId": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Microsoft Entra or package manifest GUID."
+              }
+            },
+            "required": [
+              "connectionVersion",
+              "packageId",
+              "catalog",
+              "packageName",
+              "solutionId"
+            ]
+          }
+        },
+        "required": [
+          "packageId",
+          "confirmation"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "kind": "package"
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_status",
+      "description": "Read connection status and capabilities. Microsoft OAuth consent requires human Microsoft sign-in in the portal.",
+      "path": "/api/sharepoint",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_list_subscriptions",
+      "description": "Read up to 50 saved SharePoint list subscriptions, ordered by expiry, with workflow and reconciliation status. Graph secrets and delta cursors are excluded.",
+      "path": "/api/sharepoint/subscriptions",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_subscription_create",
+      "description": "Create one Graph change subscription for the exact SharePoint site, list GUID and enabled change workflow supplied. This writes a remote subscription; call only after the administrator selects that exact target and workflow.",
+      "path": "/api/sharepoint/subscriptions",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Exact HTTPS SharePoint site URL on the connected host.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact SharePoint list GUID."
+          },
+          "workflowId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact enabled workflow configured for sharepoint.list.changed."
+          }
+        },
+        "required": [
+          "siteUrl",
+          "listId",
+          "workflowId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "create"
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_subscription_renew",
+      "description": "Renew one Graph subscription after confirming its saved subscription ID, exact site, list GUID and bound workflow. This writes to Microsoft Graph; inspect the subscription first.",
+      "path": "/api/sharepoint/subscriptions",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact saved subscription ID from sharepoint_list_subscriptions."
+          },
+          "siteUrl": {
+            "type": "string",
+            "description": "Exact site URL returned by sharepoint_list_subscriptions.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact list GUID returned by sharepoint_list_subscriptions."
+          },
+          "workflowId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact workflow ID returned by sharepoint_list_subscriptions."
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "siteUrl",
+          "listId",
+          "workflowId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "renew"
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_subscription_reconcile",
+      "description": "Read one delta page of up to 200 items and emit idempotent change events only to the saved workflow after exact subscription, site, list and workflow confirmation. This can start workflow runs and their configured side effects; inspect the workflow steps before calling. Repeat until syncComplete is true and pending is false.",
+      "path": "/api/sharepoint/subscriptions",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact saved subscription ID."
+          },
+          "siteUrl": {
+            "type": "string",
+            "description": "Exact site URL returned by sharepoint_list_subscriptions.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact list GUID returned by sharepoint_list_subscriptions."
+          },
+          "workflowId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact enabled workflow returned by sharepoint_list_subscriptions."
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "siteUrl",
+          "listId",
+          "workflowId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "reconcile"
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_handoff",
+      "description": "Download the administrator handoff. Microsoft app registration and consent require the appropriate human Microsoft identity.",
+      "path": "/api/sharepoint?handoff=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_certificate",
+      "description": "Download the public runtime certificate for Microsoft registration; the private key stays on the host.",
+      "path": "/api/sharepoint?certificate=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_bootstrap",
+      "description": "Read setup registration instructions; Microsoft sign-in and consent must be completed by a human in the portal.",
+      "path": "/api/sharepoint?bootstrap=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_setup_instructions",
+      "description": "Read setup guidance; Microsoft sign-in and consent require a human in the portal.",
+      "path": "/api/sharepoint?bootstrap=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_save_setup",
+      "description": "Save a setup OAuth application's client ID and write-only secret on an unmanaged host. Human Microsoft sign-in remains required for consent.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          },
+          "secret": {
+            "type": "string",
+            "description": "Setup client secret value; encrypted on the host and never returned.",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "clientId",
+          "secret"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "save-setup"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_manual",
+      "description": "Initialize a manual connection and destination with a host-generated certificate. A human must register/approve the Microsoft runtime app.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tenant": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          },
+          "catalog": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "site": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "manual"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_destination",
+      "description": "Configure tenant, catalog and read verification site on the existing connection.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tenant": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          },
+          "catalog": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "site": {
+            "type": "string",
+            "description": "HTTPS SharePoint site URL, without query parameters or fragments.",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "destination"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_attach",
+      "description": "Attach an existing runtime application's ID and tenant. Human Microsoft runtime consent and actual read verification remain required.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          },
+          "tenant": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Microsoft Entra or package manifest GUID."
+          }
+        },
+        "required": [
+          "clientId"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "attach"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_guide",
+      "description": "Record the manual registration checklist step; this does not grant Microsoft permissions.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "guide"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_verify",
+      "description": "Perform external Microsoft authentication and read capability checks and update connection verification status.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "verify"
+      },
+      "deployOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_rotate",
+      "description": "Generate a replacement runtime certificate. A human must upload its public certificate to the Microsoft app before activation.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "rotate"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_activate",
+      "description": "Authenticate and activate the staged runtime certificate after its registration in Microsoft.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "activate"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_rollback",
+      "description": "Restore the retained previous runtime credential and require verification again.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "rollback"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_finish_rotation",
+      "description": "Retire the retained previous host credential after required read and explicit write verification. Human removal of its old Microsoft certificate remains separate.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "finish-rotation"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "sharepoint_disconnect",
+      "description": "Disconnect the host runtime connection. Microsoft application or consent cleanup requires the tenant administrator.",
+      "path": "/api/sharepoint",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "action": "disconnect"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope"
+    },
+    {
+      "name": "settings_read",
+      "description": "Read public mail configuration and host readiness; retained secrets are excluded.",
+      "path": "/api/settings",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "settings_save_email",
+      "description": "Save SMTP settings, at most 8 KiB total. Empty password preserves the saved secret unless clearPassword is true.",
+      "path": "/api/settings",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "SMTP hostname without URL or port.",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender email address.",
+            "minLength": 1,
+            "maxLength": 254
+          },
+          "user": {
+            "type": "string",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Write-only SMTP password; empty preserves the current password."
+          },
+          "clearPassword": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "host",
+          "port",
+          "from",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "save-email"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "settings_verify_email",
+      "description": "Verify the configured SMTP connection externally; does not send a message.",
+      "path": "/api/settings",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "verify-email"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "diagnostics_status",
+      "description": "Read whether diagnostic collection is enabled.",
+      "path": "/api/diagnostics",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "diagnostics_export",
+      "description": "Export the sanitized diagnostic bundle.",
+      "path": "/api/diagnostics?export=1",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "diagnostics_toggle",
+      "description": "Enable or disable diagnostic collection.",
+      "path": "/api/diagnostics",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this record is enabled."
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "toggle"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "diagnostics_ingest",
+      "description": "Ingest at most 20 allowlisted diagnostic events in a 16 KiB request. Event fields are validated and sanitized by the server.",
+      "path": "/api/diagnostics",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "event",
+                "target"
+              ],
+              "properties": {
+                "event": {
+                  "enum": [
+                    "navigation",
+                    "click",
+                    "change",
+                    "submit",
+                    "invalid",
+                    "exception",
+                    "request-start",
+                    "request-end",
+                    "action",
+                    "transition",
+                    "microsoft-start",
+                    "microsoft-end",
+                    "worker-start",
+                    "worker-end",
+                    "job-start",
+                    "job-end",
+                    "queue-drop"
+                  ]
+                },
+                "target": {
+                  "enum": [
+                    "deployments",
+                    "settings",
+                    "integrations",
+                    "automations",
+                    "sharepoint",
+                    "callback",
+                    "setup",
+                    "runtime",
+                    "graph",
+                    "spo",
+                    "worker",
+                    "job",
+                    "connect",
+                    "save-setup",
+                    "setup-instructions",
+                    "manual",
+                    "guide",
+                    "destination",
+                    "attach",
+                    "verify",
+                    "rotate",
+                    "activate",
+                    "rollback",
+                    "finish-rotation",
+                    "disconnect",
+                    "clientId",
+                    "secret",
+                    "tenant",
+                    "catalog",
+                    "site",
+                    "form",
+                    "navigation",
+                    "queue"
+                  ]
+                },
+                "outcome": {
+                  "enum": [
+                    "ok",
+                    "blocked",
+                    "redirect",
+                    "validation",
+                    "auth",
+                    "network",
+                    "internal",
+                    "attention",
+                    "declined",
+                    "expired",
+                    "busy",
+                    "dropped"
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "setup-required",
+                    "approval-required",
+                    "provisioning",
+                    "verifying",
+                    "verified-read",
+                    "attention",
+                    "disconnected"
+                  ]
+                },
+                "trace": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Version 4 trace UUID."
+                },
+                "span": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Version 4 span UUID."
+                },
+                "viewport": {
+                  "enum": [
+                    "narrow",
+                    "medium",
+                    "wide"
+                  ]
+                },
+                "browser": {
+                  "enum": [
+                    "chromium",
+                    "firefox",
+                    "webkit",
+                    "other"
+                  ]
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 599
+                },
+                "duration": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 3600000
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "observedAt": {
+                  "type": "integer",
+                  "description": "Unix milliseconds within five minutes of server time."
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "ingest"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "integrations_list",
+      "description": "List integration metadata and enabled subscribers; retained token values are excluded.",
+      "path": "/api/integrations",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "integrations_create",
+      "description": "Create an expiring feed, event-write, read or SharePoint-deployment credential. Full administrator agent access can only be granted by the configured Owner through agent approval.",
+      "path": "/api/integrations",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Integration name.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "permission": {
+            "enum": [
+              "feed:read",
+              "events:write",
+              "platform:read",
+              "platform:deploy"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "description": "Subscriber ID, external event type, or exactly workspace for platform access.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "origin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional exact HTTPS browser origin, only for feed:read. Omit for server-only tokens."
+          },
+          "expiresAt": {
+            "type": "integer",
+            "description": "Expiry as Unix milliseconds, after now and within 366 days."
+          }
+        },
+        "required": [
+          "name",
+          "permission",
+          "scope",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "create"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "integrations_revoke",
+      "description": "Revoke an integration credential immediately.",
+      "path": "/api/integrations",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {
+        "operation": "revoke"
+      },
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "agents_list",
+      "description": "List pending and approved agent identities and recent agent audit events. Credential values and hashes are excluded. Agent approval remains reserved to the configured Owner.",
+      "path": "/api/agents",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "feed_read",
+      "description": "Read up to 100 notification events for a subscriber after a cursor.",
+      "path": "/api/automation/feed",
+      "method": "GET",
+      "readOnly": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscriber": {
+            "type": "string",
+            "description": "Existing record ID.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "after": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "default": 0
+          }
+        },
+        "required": [
+          "subscriber"
+        ],
+        "additionalProperties": false
+      },
+      "query": [
+        "subscriber",
+        "after"
+      ],
+      "coverage": "uncovered",
+      "livePolicy": "read-only"
+    },
+    {
+      "name": "event_emit",
+      "description": "Emit an external event with a stable retry ID. Request limit is 40 KB and serialized payload limit is 32 KiB. Team approval, poll and form event types are reserved; accepted events may trigger workflows.",
+      "path": "/api/automation/events",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Producer event ID used for idempotency.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "type": {
+            "type": "string",
+            "description": "External event type; approval, poll and form prefixes are reserved.",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "payload": {
+            "description": "JSON event payload, at most 32 KiB serialized."
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "fixed": {},
+      "coverage": "uncovered",
+      "livePolicy": "unsafe-or-not-started"
+    }
+  ],
+  "resourceCoverage": [
+    {
+      "kind": "sharepoint-list",
+      "operations": [
+        "deployment_site_list_create",
+        "deployment_site_list_rename",
+        "deployment_site_list_delete",
+        "deployment_list_seed",
+        "deployment_list_seed_continue"
+      ],
+      "lifecycle": "Create a uniquely named list, capture its exact ID, use same-run list deletion for cleanup; seed continuation may need durable job/status recovery before list ID is known."
+    },
+    {
+      "kind": "sharepoint-list-item",
+      "operations": [
+        "deployment_list_item_create",
+        "deployment_list_item_update",
+        "deployment_list_item_delete",
+        "deployment_list_items_batch_create",
+        "deployment_list_items_batch_update",
+        "deployment_list_seed",
+        "deployment_list_seed_continue"
+      ],
+      "lifecycle": "Create and update only items in a same-run list; verify via exact readback/ETag and clean all leftovers by deleting that same-run owned list."
+    },
+    {
+      "kind": "sharepoint-column",
+      "operations": [
+        "deployment_list_column_create"
+      ],
+      "lifecycle": "Columns are scoped to a same-run owned list and cleaned by deleting the parent list; no standalone column delete is exposed."
+    },
+    {
+      "kind": "sharepoint-site",
+      "operations": [
+        "deployment_site_create",
+        "deployment_site_create_status",
+        "deployment_site_create_continue"
+      ],
+      "lifecycle": "One explicitly confirmed dedicated dev-site creation only; there is no site-delete action. Keep separate from reusable CRUD packs and require exact site, title, owner, template, connection version, and status/recovery evidence."
+    },
+    {
+      "kind": "persistent-side-effects",
+      "operations": [
+        "deployment_page",
+        "deployment_upload",
+        "deployment_site_install",
+        "deployment_site_uninstall",
+        "sharepoint_subscription_create",
+        "sharepoint_subscription_renew",
+        "sharepoint_subscription_reconcile"
+      ],
+      "lifecycle": "Persistent package/page/subscription or workflow effects have no same-run cleanup in this pack; unsafe or not started pending dedicated lifecycle design."
+    },
+    {
+      "kind": "read-only-sharepoint",
+      "operations": [
+        "deployment_site_catalogs",
+        "deployment_recycle_bin_assess",
+        "deployment_list_changes",
+        "deployment_site_create_status",
+        "deployment_list_seed_status",
+        "deployment_list_items",
+        "deployment_list_items_batch"
+      ],
+      "lifecycle": "Read-only actions are eligible for exact-target positive and safe invalid-input cases; no tenant writes."
+    },
+    {
+      "kind": "connection-auth",
+      "operations": [
+        "sharepoint_save_setup",
+        "sharepoint_manual",
+        "sharepoint_attach",
+        "sharepoint_verify",
+        "sharepoint_rotate",
+        "sharepoint_activate",
+        "sharepoint_rollback",
+        "sharepoint_disconnect"
+      ],
+      "lifecycle": "Connection setup and credential lifecycle operations remain excluded from test runs."
+    }
+  ]
+}
