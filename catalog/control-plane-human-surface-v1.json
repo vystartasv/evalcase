@@ -1,0 +1,242 @@
+{
+  "format": "evalcase.human-operation-surface",
+  "version": 1,
+  "id": "control-plane-human-backend-v1",
+  "source": {
+    "repository": "vystartasv/control-plane",
+    "commit": "c5001f1b3ffae2ea20f513ffe8c8eabc907a17c9",
+    "scope": "Selected human portal/backend operations observed in registered routes and UI fetch calls. This snapshot covers key connector, site/list, automation, settings, agent, and session surfaces but is not a complete portal API inventory."
+  },
+  "operations": [
+    {
+      "id": "sharepoint.connection.read",
+      "endpoint": "GET /api/sharepoint",
+      "method": "GET",
+      "agentOperation": "sharepoint_status"
+    },
+    {
+      "id": "sharepoint.oauth.handoff",
+      "endpoint": "GET /api/sharepoint?handoff=1",
+      "method": "GET",
+      "agentOperation": "sharepoint_handoff"
+    },
+    {
+      "id": "sharepoint.oauth.consent",
+      "endpoint": "POST /api/oauth/approve",
+      "method": "POST"
+    },
+    {
+      "id": "sharepoint.subscription.list",
+      "endpoint": "GET /api/sharepoint/subscriptions",
+      "method": "GET",
+      "agentOperation": "sharepoint_list_subscriptions"
+    },
+    {
+      "id": "sharepoint.subscription.create",
+      "endpoint": "POST /api/sharepoint/subscriptions",
+      "method": "POST",
+      "agentOperation": "sharepoint_subscription_create"
+    },
+    {
+      "id": "sharepoint.subscription.renew",
+      "endpoint": "POST /api/sharepoint/subscriptions",
+      "method": "POST",
+      "agentOperation": "sharepoint_subscription_renew"
+    },
+    {
+      "id": "sharepoint.subscription.reconcile",
+      "endpoint": "POST /api/sharepoint/subscriptions",
+      "method": "POST",
+      "agentOperation": "sharepoint_subscription_reconcile"
+    },
+    {
+      "id": "deployments.site-create.read-status",
+      "endpoint": "GET /api/deployments/site-create",
+      "method": "GET",
+      "agentOperation": "deployment_site_create_status"
+    },
+    {
+      "id": "deployments.site-create.start",
+      "endpoint": "POST /api/deployments/site-create",
+      "method": "POST",
+      "agentOperation": "deployment_site_create"
+    },
+    {
+      "id": "deployments.site-create.continue",
+      "endpoint": "POST /api/deployments/site-create/continue",
+      "method": "POST",
+      "agentOperation": "deployment_site_create_continue"
+    },
+    {
+      "id": "deployments.site-lists.read",
+      "endpoint": "GET /api/deployments/site-lists",
+      "method": "GET",
+      "agentOperation": "deployment_site_lists"
+    },
+    {
+      "id": "deployments.site-lists.create",
+      "endpoint": "POST /api/deployments/site-lists",
+      "method": "POST",
+      "agentOperation": "deployment_site_list_create"
+    },
+    {
+      "id": "deployments.site-lists.rename",
+      "endpoint": "POST /api/deployments/site-lists",
+      "method": "POST",
+      "agentOperation": "deployment_site_list_rename"
+    },
+    {
+      "id": "deployments.site-lists.delete",
+      "endpoint": "POST /api/deployments/site-lists",
+      "method": "POST",
+      "agentOperation": "deployment_site_list_delete"
+    },
+    {
+      "id": "deployments.list-columns.read",
+      "endpoint": "GET /api/deployments/list-columns",
+      "method": "GET",
+      "agentOperation": "deployment_list_columns"
+    },
+    {
+      "id": "deployments.list-columns.create",
+      "endpoint": "POST /api/deployments/list-columns",
+      "method": "POST",
+      "agentOperation": "deployment_list_column_create"
+    },
+    {
+      "id": "deployments.list-items.read",
+      "endpoint": "GET /api/deployments/list-items",
+      "method": "GET",
+      "agentOperation": "deployment_list_items"
+    },
+    {
+      "id": "deployments.list-items.batch-create",
+      "endpoint": "POST /api/deployments/list-items",
+      "method": "POST",
+      "agentOperation": "deployment_list_items_batch_create"
+    },
+    {
+      "id": "deployments.list-items.single-read",
+      "endpoint": "GET /api/deployments/list-item",
+      "method": "GET",
+      "agentOperation": "deployment_list_item_read"
+    },
+    {
+      "id": "deployments.list-items.single-create",
+      "endpoint": "POST /api/deployments/list-item",
+      "method": "POST",
+      "agentOperation": "deployment_list_item_create"
+    },
+    {
+      "id": "deployments.list-items.single-update",
+      "endpoint": "PUT /api/deployments/list-item",
+      "method": "PUT",
+      "agentOperation": "deployment_list_item_update"
+    },
+    {
+      "id": "deployments.list-items.single-delete",
+      "endpoint": "DELETE /api/deployments/list-item",
+      "method": "DELETE",
+      "agentOperation": "deployment_list_item_delete"
+    },
+    {
+      "id": "deployments.list-seed.start",
+      "endpoint": "POST /api/deployments/list-seed",
+      "method": "POST",
+      "agentOperation": "deployment_list_seed"
+    },
+    {
+      "id": "deployments.list-seed.continue",
+      "endpoint": "POST /api/deployments/list-seed/continue",
+      "method": "POST",
+      "agentOperation": "deployment_list_seed_continue"
+    },
+    {
+      "id": "automation.workflow-authoring",
+      "endpoint": "GET/POST /api/automation",
+      "method": "GET/POST",
+      "agentOperation": "automation_workflow"
+    },
+    {
+      "id": "sharepoint.setup.save",
+      "endpoint": "POST /api/sharepoint",
+      "method": "POST",
+      "agentOperation": "sharepoint_save_setup"
+    },
+    {
+      "id": "settings.email-config.read",
+      "endpoint": "GET /api/settings",
+      "method": "GET",
+      "agentOperation": "settings_read"
+    },
+    {
+      "id": "settings.email-config.save",
+      "endpoint": "POST /api/settings",
+      "method": "POST",
+      "agentOperation": "settings_save_email"
+    },
+    {
+      "id": "integrations.connector.list",
+      "endpoint": "GET /api/integrations",
+      "method": "GET",
+      "agentOperation": "integrations_list"
+    },
+    {
+      "id": "integrations.connector.create",
+      "endpoint": "POST /api/integrations",
+      "method": "POST",
+      "agentOperation": "integrations_create"
+    },
+    {
+      "id": "integrations.connector.revoke",
+      "endpoint": "POST /api/integrations",
+      "method": "POST",
+      "agentOperation": "integrations_revoke"
+    },
+    {
+      "id": "integrations.agent-credentials.read",
+      "endpoint": "GET /api/agents",
+      "method": "GET",
+      "agentOperation": "agents_list"
+    },
+    {
+      "id": "integrations.agent-credentials.create",
+      "endpoint": "POST /api/agents",
+      "method": "POST"
+    },
+    {
+      "id": "portal.session.create",
+      "endpoint": "POST /api/session",
+      "method": "POST"
+    },
+    {
+      "id": "portal.session.delete",
+      "endpoint": "DELETE /api/session",
+      "method": "DELETE"
+    },
+    {
+      "id": "portal.diagnostics.read",
+      "endpoint": "GET /api/diagnostics",
+      "method": "GET",
+      "agentOperation": "diagnostics_status"
+    },
+    {
+      "id": "portal.diagnostics.update",
+      "endpoint": "POST /api/diagnostics",
+      "method": "POST",
+      "agentOperation": "diagnostics_toggle"
+    },
+    {
+      "id": "settings.email-config.verify",
+      "endpoint": "POST /api/settings",
+      "method": "POST",
+      "agentOperation": "settings_verify_email"
+    },
+    {
+      "id": "portal.diagnostics.export",
+      "endpoint": "POST /api/diagnostics",
+      "method": "POST",
+      "agentOperation": "diagnostics_export"
+    }
+  ]
+}

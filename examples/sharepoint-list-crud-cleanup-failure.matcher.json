@@ -1,0 +1,60 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "sharepoint-list-crud-cleanup-after-failure-v1",
+  "run": {
+    "state": "failed",
+    "stepCount": 7
+  },
+  "steps": [
+    {
+      "position": 0,
+      "action": "Finalize workflow",
+      "state": "failed",
+      "replayMode": "repeatable-control",
+      "messageContains": "bounded final cleanup completed"
+    },
+    {
+      "position": 1,
+      "action": "deployment_site_lists",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_site_lists returned HTTP 200"
+    },
+    {
+      "position": 2,
+      "action": "deployment_site_list_create",
+      "state": "succeeded",
+      "replayMode": "once-create",
+      "messageContains": "deployment_site_list_create returned HTTP 201"
+    },
+    {
+      "position": 3,
+      "action": "deployment_list_column_create",
+      "state": "succeeded",
+      "replayMode": "once-create",
+      "messageContains": "deployment_list_column_create returned HTTP 201"
+    },
+    {
+      "position": 4,
+      "action": "deployment_list_columns",
+      "state": "failed",
+      "replayMode": "repeatable-read",
+      "messageContains": "Step failed"
+    },
+    {
+      "position": 5,
+      "action": "Select condition branch",
+      "state": "succeeded",
+      "replayMode": "repeatable-control",
+      "messageContains": "yes branch"
+    },
+    {
+      "position": 6,
+      "action": "deployment_site_list_delete",
+      "state": "succeeded",
+      "replayMode": "once-delete",
+      "messageContains": "deployment_site_list_delete returned HTTP 200"
+    }
+  ]
+}

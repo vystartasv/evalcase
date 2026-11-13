@@ -1,0 +1,35 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-site-list-read-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "SharePoint site list read",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "site",
+      "bindings": [
+        "siteUrl"
+      ]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "lists.read",
+        "operation": "deployment_site_lists",
+        "arguments": {
+          "siteUrl": {
+            "$target": "siteUrl"
+          }
+        },
+        "capture": {
+          "items": "/items"
+        }
+      }
+    ]
+  }
+}
