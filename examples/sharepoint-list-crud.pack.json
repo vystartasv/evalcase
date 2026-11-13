@@ -20,192 +20,326 @@
     },
     "steps": [
       {
-        "type": "integration-action",
-        "id": "list.create",
-        "operation": "deployment_site_list_create",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
+        "type": "finalize",
+        "steps": [
+          {
+            "type": "integration-action",
+            "id": "lists.read.valid",
+            "operation": "deployment_site_lists",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              }
+            },
+            "capture": {
+              "items": "/items"
+            }
           },
-          "displayName": {
-            "$target": "listName"
+          {
+            "type": "integration-action",
+            "id": "list.create",
+            "operation": "deployment_site_list_create",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "displayName": {
+                "$target": "listName"
+              },
+              "columns": [
+                "EvalcaseText"
+              ],
+              "confirmed": true
+            },
+            "capture": {
+              "listId": "/id",
+              "displayName": "/displayName"
+            }
           },
-          "columns": [
-            "EvalcaseText"
-          ],
-          "confirmed": true
-        },
-        "capture": {
-          "listId": "/id",
-          "displayName": "/displayName"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "lists.read.valid",
-        "operation": "deployment_site_lists",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
+          {
+            "type": "integration-action",
+            "id": "list.column.create",
+            "operation": "deployment_list_column_create",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "displayName": "EvalcaseExtraText",
+              "type": "text",
+              "confirmed": true
+            },
+            "capture": {
+              "column": "/column/name"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.columns.read",
+            "operation": "deployment_list_columns",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              }
+            },
+            "capture": {
+              "columns": "/items"
+            }
+          },
+          {
+            "type": "condition",
+            "path": "/captures/list.columns.read/columns",
+            "operator": "contains",
+            "value": {
+              "displayName": "EvalcaseExtraText"
+            },
+            "then": [
+              {
+                "type": "repeat",
+                "count": 1,
+                "steps": [
+                  {
+                    "type": "delay",
+                    "durationMs": 1
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "type": "delay",
+                "durationMs": 1
+              }
+            ]
+          },
+          {
+            "type": "integration-action",
+            "id": "list.changes.baseline",
+            "operation": "deployment_list_changes",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              }
+            },
+            "capture": {
+              "baseline": "/baseline",
+              "cursor": "/cursor"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.items.read",
+            "operation": "deployment_list_items",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              }
+            },
+            "capture": {
+              "items": "/items"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.rename.valid",
+            "operation": "deployment_site_list_rename",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "currentDisplayName": {
+                "$target": "listName"
+              },
+              "displayName": {
+                "$target": "renamedListName"
+              },
+              "confirmed": true
+            },
+            "capture": {
+              "displayName": "/displayName"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.create.valid",
+            "operation": "deployment_list_item_create",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "fields": {
+                "Title": "Evalcase temporary item",
+                "EvalcaseExtraText": "created by the evaluation run"
+              },
+              "confirmed": true
+            },
+            "capture": {
+              "itemId": "/id",
+              "eTag": "/eTag"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.batch-read",
+            "operation": "deployment_list_items_batch",
+            "arguments": {
+              "targets": [
+                {
+                  "siteUrl": {
+                    "$target": "siteUrl"
+                  },
+                  "listId": {
+                    "$capture": "list.create.listId"
+                  },
+                  "itemId": {
+                    "$capture": "item.create.valid.itemId"
+                  }
+                }
+              ]
+            },
+            "capture": {
+              "items": "/items"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.read.before-update",
+            "operation": "deployment_list_item_read",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "itemId": {
+                "$capture": "item.create.valid.itemId"
+              }
+            },
+            "capture": {
+              "eTag": "/eTag",
+              "itemId": "/id",
+              "title": "/fields/Title"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.update.valid",
+            "operation": "deployment_list_item_update",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "itemId": {
+                "$capture": "item.create.valid.itemId"
+              },
+              "eTag": {
+                "$capture": "item.read.before-update.eTag"
+              },
+              "fields": {
+                "Title": "Evalcase updated item"
+              },
+              "confirmed": true
+            },
+            "capture": {
+              "title": "/fields/Title"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.read.before-delete",
+            "operation": "deployment_list_item_read",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "itemId": {
+                "$capture": "item.create.valid.itemId"
+              }
+            },
+            "capture": {
+              "eTag": "/eTag",
+              "itemId": "/id"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.delete.valid",
+            "operation": "deployment_list_item_delete",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "itemId": {
+                "$capture": "item.create.valid.itemId"
+              },
+              "eTag": {
+                "$capture": "item.read.before-delete.eTag"
+              },
+              "confirmed": true
+            },
+            "capture": {
+              "deleted": "/deleted"
+            }
           }
-        },
-        "capture": {
-          "items": "/items"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "list.rename.valid",
-        "operation": "deployment_site_list_rename",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "currentDisplayName": {
-            "$target": "listName"
-          },
-          "displayName": {
-            "$target": "renamedListName"
-          },
-          "confirmed": true
-        },
-        "capture": {
-          "displayName": "/displayName"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "item.create.valid",
-        "operation": "deployment_list_item_create",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "fields": {
-            "Title": "Evalcase temporary item"
-          },
-          "confirmed": true
-        },
-        "capture": {
-          "itemId": "/id",
-          "eTag": "/eTag"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "item.read.before-update",
-        "operation": "deployment_list_item_read",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "itemId": {
-            "$capture": "item.create.valid.itemId"
+        ],
+        "cleanup": [
+          {
+            "type": "condition",
+            "path": "/captures/list.create/listId",
+            "operator": "exists",
+            "value": true,
+            "then": [
+              {
+                "type": "integration-action",
+                "id": "list.delete.valid",
+                "operation": "deployment_site_list_delete",
+                "arguments": {
+                  "siteUrl": {
+                    "$target": "siteUrl"
+                  },
+                  "listId": {
+                    "$capture": "list.create.listId"
+                  },
+                  "currentDisplayName": {
+                    "$target": "renamedListName"
+                  },
+                  "confirmed": true
+                },
+                "capture": {
+                  "deleted": "/deleted"
+                }
+              }
+            ],
+            "else": []
           }
-        },
-        "capture": {
-          "eTag": "/eTag",
-          "itemId": "/id",
-          "title": "/fields/Title"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "item.update.valid",
-        "operation": "deployment_list_item_update",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "itemId": {
-            "$capture": "item.create.valid.itemId"
-          },
-          "eTag": {
-            "$capture": "item.read.before-update.eTag"
-          },
-          "fields": {
-            "Title": "Evalcase updated item"
-          },
-          "confirmed": true
-        },
-        "capture": {
-          "title": "/fields/Title"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "item.read.before-delete",
-        "operation": "deployment_list_item_read",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "itemId": {
-            "$capture": "item.create.valid.itemId"
-          }
-        },
-        "capture": {
-          "eTag": "/eTag",
-          "itemId": "/id"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "item.delete.valid",
-        "operation": "deployment_list_item_delete",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "itemId": {
-            "$capture": "item.create.valid.itemId"
-          },
-          "eTag": {
-            "$capture": "item.read.before-delete.eTag"
-          },
-          "confirmed": true
-        },
-        "capture": {
-          "deleted": "/deleted"
-        }
-      },
-      {
-        "type": "integration-action",
-        "id": "list.delete.valid",
-        "operation": "deployment_site_list_delete",
-        "arguments": {
-          "siteUrl": {
-            "$target": "siteUrl"
-          },
-          "listId": {
-            "$capture": "list.create.listId"
-          },
-          "currentDisplayName": {
-            "$target": "renamedListName"
-          },
-          "confirmed": true
-        },
-        "capture": {
-          "deleted": "/deleted"
-        }
+        ]
       }
     ]
   }

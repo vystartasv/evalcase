@@ -4,11 +4,11 @@
   "id": "control-plane-mcp-v1",
   "source": {
     "repository": "vystartasv/control-plane",
-    "commit": "91e98f98ee979fc7c1113d93230a212dc4b07495",
+    "commit": "2f4be91a9cc228196f3b627190550f5b3ab52b9f",
     "file": "internal/agentapi/actions.json",
     "capturedAt": "2026-11-13",
     "catalog": "connected MCP registry snapshot",
-    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use the ordinary automation APIs. deployment_site_uninstall is absent from this connected registry snapshot."
+    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Replay modes are copied where explicitly declared; runtime defaults are repeatable-read for read-only actions and once-uncertain for writes. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use ordinary automation APIs. deployment_site_uninstall is absent from this connected registry snapshot."
   },
   "actions": [
     {
@@ -1377,7 +1377,8 @@
       "resource": {
         "kind": "sharepoint-list",
         "effect": "create"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_site_list_rename",
@@ -1427,7 +1428,8 @@
       "resource": {
         "kind": "sharepoint-list",
         "effect": "update"
-      }
+      },
+      "automationReplayMode": "once-update-state-required"
     },
     {
       "name": "deployment_site_list_delete",
@@ -1471,7 +1473,8 @@
       "resource": {
         "kind": "sharepoint-list",
         "effect": "delete"
-      }
+      },
+      "automationReplayMode": "once-delete"
     },
     {
       "name": "deployment_list_columns",
@@ -1608,7 +1611,8 @@
         "kind": "sharepoint-column",
         "effect": "create",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_site_create",
@@ -1716,7 +1720,8 @@
       "resource": {
         "kind": "sharepoint-site",
         "effect": "create"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_site_create_status",
@@ -1861,7 +1866,8 @@
       "resource": {
         "kind": "sharepoint-site",
         "effect": "update"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_list_seed",
@@ -1922,7 +1928,8 @@
       "resource": {
         "kind": "sharepoint-list",
         "effect": "create"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_list_seed_status",
@@ -1991,7 +1998,8 @@
         "kind": "sharepoint-list-item",
         "effect": "create",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_list_items",
@@ -2162,7 +2170,8 @@
         "kind": "sharepoint-list-item",
         "effect": "create",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_list_items_batch_update",
@@ -2234,7 +2243,8 @@
         "kind": "sharepoint-list-item",
         "effect": "update",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-update-etag-required"
     },
     {
       "name": "deployment_list_item_read",
@@ -2320,7 +2330,8 @@
         "kind": "sharepoint-list-item",
         "effect": "create",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_list_item_update",
@@ -2378,7 +2389,8 @@
         "kind": "sharepoint-list-item",
         "effect": "update",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-update-etag-required"
     },
     {
       "name": "deployment_list_item_delete",
@@ -2429,7 +2441,8 @@
         "kind": "sharepoint-list-item",
         "effect": "delete",
         "parentKind": "sharepoint-list"
-      }
+      },
+      "automationReplayMode": "once-delete"
     },
     {
       "name": "deployment_upload",
@@ -2631,7 +2644,8 @@
       },
       "deployOnly": false,
       "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
+      "livePolicy": "gated-outside-authorized-scope",
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_copy_continue",
@@ -3013,7 +3027,8 @@
       },
       "deployOnly": true,
       "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
+      "livePolicy": "gated-outside-authorized-scope",
+      "automationReplayMode": "once-create"
     },
     {
       "name": "deployment_package",
@@ -3156,7 +3171,8 @@
       },
       "adminOnly": true,
       "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
+      "livePolicy": "gated-outside-authorized-scope",
+      "automationReplayMode": "once-create"
     },
     {
       "name": "sharepoint_subscription_renew",
@@ -3202,7 +3218,8 @@
       },
       "adminOnly": true,
       "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
+      "livePolicy": "gated-outside-authorized-scope",
+      "automationReplayMode": "once-update-state-required"
     },
     {
       "name": "sharepoint_subscription_reconcile",

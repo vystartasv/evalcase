@@ -118,6 +118,8 @@ test("run matcher returns a deterministic yes/no from ordinary automation run lo
     ]
   });
   assert.ok(matcher);
+  assert.equal(parseRunMatcher({ ...matcher, steps: matcher.steps.slice(0, 1) }), undefined);
+  assert.equal(parseRunMatcher({ ...matcher, steps: [{ ...matcher.steps[0], position: 2 }, matcher.steps[1]] }), undefined);
   const log = { runs: [{ id: "run-1", workflow_id: "workflow-1", state: "succeeded", steps: [
     { position: 0, action: "Call an API", state: "succeeded", replay_mode: "repeatable-read", message: "API call completed." },
     { position: 1, action: "Combine API results", state: "succeeded", replay_mode: "repeatable-stateless", message: "Combined 1 API results." }

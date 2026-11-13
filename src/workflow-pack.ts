@@ -24,6 +24,7 @@ export type Operation = {
   description: string;
   inputSchema: Schema;
   readOnly: boolean;
+  automationReplayMode?: "repeatable-read" | "repeatable-stateless" | "once-create" | "once-update-etag-required" | "once-update-state-required" | "once-delete" | "once-uncertain";
   coverage: "uncovered" | "pack-defined-not-live-verified" | "live-verified";
   livePolicy: "read-only" | "run-owned-resource-cleanup-required" | "one-time-confirmed-target-required" | "gated-outside-authorized-scope" | "unsafe-or-not-started";
   resource?: { kind: string; effect: "create" | "update" | "delete"; parentKind?: string };
@@ -234,6 +235,7 @@ export const parseOperationInventory = (value: unknown): { value?: OperationInve
       diagnostics.push({ code: "INVENTORY_ACTION", path, message: "action requires a name, input schema, and read-only flag" });
       return;
     }
+    if (action.automationReplayMode !== undefined && !["repeatable-read", "repeatable-stateless", "once-create", "once-update-etag-required", "once-update-state-required", "once-delete", "once-uncertain"].includes(String(action.automationReplayMode))) diagnostics.push({ code: "INVENTORY_REPLAY_MODE", path: `${path}.automationReplayMode`, message: "unsupported automation replay mode" });
     if (names.has(action.name)) diagnostics.push({ code: "INVENTORY_DUPLICATE", path: `${path}.name`, message: "operation name must be unique" });
     names.add(action.name);
   });
