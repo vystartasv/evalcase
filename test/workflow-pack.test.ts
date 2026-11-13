@@ -1,10 +1,20 @@
 import { describe, expect, test } from "bun:test";
-import { parseOperationInventory, parseWorkflowPack } from "../src/workflow-pack.js";
+import { parseOperationInventory, parseWorkflowPack, schemaIssuesWithBindings } from "../src/workflow-pack.js";
 import { parseAutomationPack } from "../src/automation-pack.js";
 import { matchRunLog, parseRunMatcher } from "../src/run-matcher.js";
 import { readFile } from "node:fs/promises";
 
 describe("portable connected-integration packs", () => {
+  test("validates catalog numeric, format, encoding, and oneOf constraints", () => {
+    const emptyCaptures = new Map<string, string>();
+    expect(schemaIssuesWithBindings({ type: "integer", minimum: 1, maximum: 3 }, 0, "$.count", emptyCaptures).map((issue) => issue.code)).toContain("ARG_MINIMUM");
+    expect(schemaIssuesWithBindings({ type: "integer", minimum: 1, maximum: 3 }, 4, "$.count", emptyCaptures).map((issue) => issue.code)).toContain("ARG_MAXIMUM");
+    expect(schemaIssuesWithBindings({ type: "string", format: "email" }, "not-an-email", "$.email", emptyCaptures).map((issue) => issue.code)).toContain("ARG_FORMAT");
+    expect(schemaIssuesWithBindings({ type: "string", format: "uri" }, "/relative", "$.url", emptyCaptures).map((issue) => issue.code)).toContain("ARG_FORMAT");
+    expect(schemaIssuesWithBindings({ type: "string", contentEncoding: "base64" }, "%%%", "$.body", emptyCaptures).map((issue) => issue.code)).toContain("ARG_ENCODING");
+    expect(schemaIssuesWithBindings({ oneOf: [{ type: "string" }, { type: "integer" }] }, true, "$.value", emptyCaptures).map((issue) => issue.code)).toContain("ARG_ONE_OF");
+  });
+
   test("validates a normal manual backend automation against a separate run matcher", async () => {
     const root = new URL("../", import.meta.url);
     const [inventoryRaw, packRaw, matcherRaw] = await Promise.all([
@@ -14,6 +24,11 @@ describe("portable connected-integration packs", () => {
     ]);
     const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
     expect(inventory.value).toBeDefined();
+    expect(inventory.value!.actions).toHaveLength(95);
+    expect(inventory.value!.actions.filter((action) => action.coverage === "pack-defined-not-live-verified")).toHaveLength(13);
+    for (const name of ["automation_recovery_decision", "deployment_site_uninstall"]) {
+      expect(inventory.value!.actions.find((action) => action.name === name)?.livePolicy).toBe("gated-outside-authorized-scope");
+    }
     const pack = parseAutomationPack(JSON.parse(packRaw), inventory.value!, JSON.parse(matcherRaw));
     expect(pack.diagnostics).toEqual([]);
     expect(pack.value?.automation.triggerType).toBe("manual");
@@ -90,11 +105,20 @@ describe("portable connected-integration packs", () => {
       { position: 1, action: "deployment_site_lists", state: "succeeded", replay_mode: "repeatable-read", message: "Action deployment_site_lists returned HTTP 200 and captured 1 value(s)." },
       { position: 2, action: "deployment_site_list_create", state: "succeeded", replay_mode: "once-create", message: "Action deployment_site_list_create returned HTTP 201 and captured 2 value(s)." },
       { position: 3, action: "deployment_list_column_create", state: "succeeded", replay_mode: "once-create", message: "Action deployment_list_column_create returned HTTP 201 and captured 1 value(s)." },
-      { position: 4, action: "deployment_list_columns", state: "failed", replay_mode: "repeatable-read", message: "Step failed. Check its configuration and external service status." },
+      { position: 4, action: "deployment_list_columns", state: "failed", replay_mode: "repeatable-read", message: "Step failed. Check its configuration and external service status.", recovery: { operation: "deployment_list_columns", reason: "The connected service returned HTTP 404.", options: [{ id: "correct-input", label: "Correct the request and run again" }, { id: "retry", label: "Retry safely" }, { id: "retry-after-delay", label: "Retry after a delay" }, { id: "ask-agent", label: "Ask an agent to review" }, { id: "ask-human", label: "Ask a human to decide" }] } },
       { position: 5, action: "Select condition branch", state: "succeeded", replay_mode: "repeatable-control", message: "Condition selected the yes branch." },
       { position: 6, action: "deployment_site_list_delete", state: "succeeded", replay_mode: "once-delete", message: "Action deployment_site_list_delete returned HTTP 200 and captured 1 value(s)." }
     ] });
     expect(result.yes).toBe(true);
+    expect(matchRunLog(matcher!, { id: "run-1", workflow_id: "workflow-1", state: "failed", steps: [
+      { position: 0, action: "Finalize workflow", state: "failed", replay_mode: "repeatable-control", message: "The primary workflow failed; bounded final cleanup completed." },
+      { position: 1, action: "deployment_site_lists", state: "succeeded", replay_mode: "repeatable-read", message: "Action deployment_site_lists returned HTTP 200 and captured 1 value(s)." },
+      { position: 2, action: "deployment_site_list_create", state: "succeeded", replay_mode: "once-create", message: "Action deployment_site_list_create returned HTTP 201 and captured 2 value(s)." },
+      { position: 3, action: "deployment_list_column_create", state: "succeeded", replay_mode: "once-create", message: "Action deployment_list_column_create returned HTTP 201 and captured 1 value(s)." },
+      { position: 4, action: "deployment_list_columns", state: "failed", replay_mode: "repeatable-read", message: "Step failed. Check its configuration and external service status." },
+      { position: 5, action: "Select condition branch", state: "succeeded", replay_mode: "repeatable-control", message: "Condition selected the yes branch." },
+      { position: 6, action: "deployment_site_list_delete", state: "succeeded", replay_mode: "once-delete", message: "Action deployment_site_list_delete returned HTTP 200 and captured 1 value(s)." }
+    ] }).yes).toBe(false);
     expect(matchRunLog(matcher!, { state: "failed", steps: [{ position: 0, action: "Finalize workflow", state: "failed" }] }).yes).toBe(false);
   });
 

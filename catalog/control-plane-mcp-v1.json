@@ -8,7 +8,7 @@
     "file": "internal/agentapi/actions.json",
     "capturedAt": "2026-11-13",
     "catalog": "connected MCP registry snapshot",
-    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Replay modes are copied where explicitly declared; runtime defaults are repeatable-read for read-only actions and once-uncertain for writes. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use ordinary automation APIs. deployment_site_uninstall is absent from this connected registry snapshot."
+    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Replay modes are copied where explicitly declared; runtime defaults are repeatable-read for read-only actions and once-uncertain for writes. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use ordinary automation APIs. automation_recovery_decision and deployment_site_uninstall are included but gated from this live evaluation scope."
   },
   "actions": [
     {
@@ -1022,6 +1022,28 @@
       "livePolicy": "unsafe-or-not-started"
     },
     {
+      "name": "automation_recovery_decision",
+      "description": "Record one selected next step from a failed automation step's recovery suggestion. This records intent only; it does not retry the action, contact anyone, or send email.",
+      "path": "/api/automation",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "runId": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "position": { "type": "integer", "minimum": 0 },
+          "choice": { "enum": ["inspect-result", "retry", "retry-after-delay", "correct-input", "refresh-etag", "refresh-state", "verify-absence", "ask-agent", "ask-human"] }
+        },
+        "required": ["runId", "position", "choice"],
+        "additionalProperties": false
+      },
+      "fixed": { "operation": "recovery-decision" },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope",
+      "automationReplayMode": "once-uncertain"
+    },
+    {
       "name": "automation_subscribe",
       "description": "Create an in-app notification subscriber or route to a configured webhook channel, optionally limited to one workflow. Failure notices go only to enabled matching subscribers.",
       "path": "/api/automation",
@@ -1291,7 +1313,7 @@
         "cursor"
       ],
       "deployOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -1325,7 +1347,7 @@
         "cursor"
       ],
       "deployOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -1372,7 +1394,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list",
@@ -1423,7 +1445,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list",
@@ -1468,7 +1490,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list",
@@ -1511,7 +1533,7 @@
         "cursor"
       ],
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -1605,7 +1627,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-column",
@@ -2069,7 +2091,7 @@
         "filterValue"
       ],
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -2117,7 +2139,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -2282,7 +2304,7 @@
         "itemId"
       ],
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -2324,7 +2346,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",
@@ -2383,7 +2405,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",
@@ -2435,7 +2457,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",
@@ -4084,6 +4106,40 @@
       "fixed": {},
       "coverage": "uncovered",
       "livePolicy": "unsafe-or-not-started"
+    },
+    {
+      "name": "deployment_site_uninstall",
+      "description": "Queue removal of a stored SPFx package from one exact site. Confirm the exact package ID and name, solution ID, catalog URL, site URL and current connection version. The worker verifies that this package is installed on this site and confirms its removal. This does not change tenant-wide deployment.",
+      "path": "/api/deployments",
+      "method": "POST",
+      "readOnly": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageId": { "type": "string", "format": "uuid" },
+          "siteUrl": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "confirmation": {
+            "type": "object",
+            "properties": {
+              "connectionVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+              "packageId": { "type": "string", "format": "uuid" },
+              "packageName": { "type": "string", "minLength": 1, "maxLength": 106 },
+              "solutionId": { "type": "string", "format": "uuid" },
+              "catalog": { "type": "string", "minLength": 1, "maxLength": 2000 },
+              "siteUrl": { "type": "string", "minLength": 1, "maxLength": 2000 }
+            },
+            "required": ["connectionVersion", "packageId", "packageName", "solutionId", "catalog", "siteUrl"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["packageId", "siteUrl", "confirmation"],
+        "additionalProperties": false
+      },
+      "adminOnly": true,
+      "coverage": "uncovered",
+      "livePolicy": "gated-outside-authorized-scope",
+      "resource": { "kind": "sharepoint-installation", "effect": "delete" },
+      "automationReplayMode": "once-delete"
     }
   ],
   "resourceCoverage": [

@@ -317,24 +317,38 @@
             "value": true,
             "then": [
               {
-                "type": "integration-action",
-                "id": "list.delete.valid",
-                "operation": "deployment_site_list_delete",
-                "arguments": {
-                  "siteUrl": {
-                    "$target": "siteUrl"
-                  },
-                  "listId": {
-                    "$capture": "list.create.listId"
-                  },
-                  "currentDisplayName": {
-                    "$target": "renamedListName"
-                  },
-                  "confirmed": true
-                },
-                "capture": {
-                  "deleted": "/deleted"
-                }
+                "type": "condition",
+                "path": "/captures/list.rename.valid/displayName",
+                "operator": "exists",
+                "value": true,
+                "then": [
+                  {
+                    "type": "integration-action",
+                    "id": "list.delete.renamed",
+                    "operation": "deployment_site_list_delete",
+                    "arguments": {
+                      "siteUrl": { "$target": "siteUrl" },
+                      "listId": { "$capture": "list.create.listId" },
+                      "currentDisplayName": { "$capture": "list.rename.valid.displayName" },
+                      "confirmed": true
+                    },
+                    "capture": { "deleted": "/deleted" }
+                  }
+                ],
+                "else": [
+                  {
+                    "type": "integration-action",
+                    "id": "list.delete.original",
+                    "operation": "deployment_site_list_delete",
+                    "arguments": {
+                      "siteUrl": { "$target": "siteUrl" },
+                      "listId": { "$capture": "list.create.listId" },
+                      "currentDisplayName": { "$target": "listName" },
+                      "confirmed": true
+                    },
+                    "capture": { "deleted": "/deleted" }
+                  }
+                ]
               }
             ],
             "else": []

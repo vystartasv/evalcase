@@ -1,0 +1,89 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-list-crud-cleanup-failure-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "SharePoint failure cleanup and recovery",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "site",
+      "bindings": ["siteUrl", "listName"]
+    },
+    "steps": [
+      {
+        "type": "finalize",
+        "steps": [
+          {
+            "type": "integration-action",
+            "id": "lists.read.valid",
+            "operation": "deployment_site_lists",
+            "arguments": { "siteUrl": { "$target": "siteUrl" } },
+            "capture": { "items": "/items" }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.create",
+            "operation": "deployment_site_list_create",
+            "arguments": {
+              "siteUrl": { "$target": "siteUrl" },
+              "displayName": { "$target": "listName" },
+              "columns": ["EvalcaseText"],
+              "confirmed": true
+            },
+            "capture": { "listId": "/id", "displayName": "/displayName" }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.column.create",
+            "operation": "deployment_list_column_create",
+            "arguments": {
+              "siteUrl": { "$target": "siteUrl" },
+              "listId": { "$capture": "list.create.listId" },
+              "displayName": "EvalcaseExtraText",
+              "type": "text",
+              "confirmed": true
+            },
+            "capture": { "column": "/column/name" }
+          },
+          {
+            "type": "integration-action",
+            "id": "list.columns.read.invalid-id",
+            "operation": "deployment_list_columns",
+            "arguments": {
+              "siteUrl": { "$target": "siteUrl" },
+              "listId": "9f9a8a5f-6a53-4fb2-bb75-62c0aac07f1b"
+            }
+          }
+        ],
+        "cleanup": [
+          {
+            "type": "condition",
+            "path": "/captures/list.create/listId",
+            "operator": "exists",
+            "value": true,
+            "then": [
+              {
+                "type": "integration-action",
+                "id": "list.delete.original",
+                "operation": "deployment_site_list_delete",
+                "arguments": {
+                  "siteUrl": { "$target": "siteUrl" },
+                  "listId": { "$capture": "list.create.listId" },
+                  "currentDisplayName": { "$target": "listName" },
+                  "confirmed": true
+                },
+                "capture": { "deleted": "/deleted" }
+              }
+            ],
+            "else": []
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -40,7 +40,11 @@
       "action": "deployment_list_columns",
       "state": "failed",
       "replayMode": "repeatable-read",
-      "messageContains": "Step failed"
+      "messageContains": "Step failed",
+      "recovery": {
+        "operation": "deployment_list_columns",
+        "optionsInclude": ["retry", "retry-after-delay", "ask-agent"]
+      }
     },
     {
       "position": 5,

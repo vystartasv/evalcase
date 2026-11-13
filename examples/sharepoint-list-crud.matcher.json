@@ -4,7 +4,7 @@
   "id": "sharepoint-list-crud-run-v1",
   "run": {
     "state": "succeeded",
-    "stepCount": 19
+    "stepCount": 20
   },
   "steps": [
     {
@@ -135,6 +135,13 @@
     },
     {
       "position": 18,
+      "action": "Select condition branch",
+      "state": "succeeded",
+      "replayMode": "repeatable-control",
+      "messageContains": "yes branch"
+    },
+    {
+      "position": 19,
       "action": "deployment_site_list_delete",
       "state": "succeeded",
       "replayMode": "once-delete",

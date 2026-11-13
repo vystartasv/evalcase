@@ -5,6 +5,7 @@ export type Schema = {
   properties?: Record<string, Schema>;
   required?: string[];
   items?: Schema;
+  oneOf?: Schema[];
   additionalProperties?: boolean;
   enum?: JsonValue[];
   const?: JsonValue;
@@ -12,6 +13,9 @@ export type Schema = {
   maxLength?: number;
   pattern?: string;
   format?: string;
+  contentEncoding?: string;
+  minimum?: number;
+  maximum?: number;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
@@ -148,11 +152,21 @@ const schemaIssues = (schema: Schema, value: unknown, path: string): Diagnostic[
   }
   if (schema.const !== undefined && JSON.stringify(schema.const) !== JSON.stringify(value)) add("ARG_CONST", "value does not match required constant");
   if (schema.enum && !schema.enum.some((candidate) => JSON.stringify(candidate) === JSON.stringify(value))) add("ARG_ENUM", "value is outside the allowed set");
+  if (schema.oneOf && schema.oneOf.filter((candidate) => schemaIssues(candidate, value, path).length === 0).length !== 1) add("ARG_ONE_OF", "value must match exactly one allowed schema");
+  if (typeof value === "number") {
+    if (schema.minimum !== undefined && value < schema.minimum) add("ARG_MINIMUM", "number is below the minimum");
+    if (schema.maximum !== undefined && value > schema.maximum) add("ARG_MAXIMUM", "number is above the maximum");
+  }
   if (typeof value === "string") {
     if (schema.minLength !== undefined && value.length < schema.minLength) add("ARG_MIN_LENGTH", "string is too short");
     if (schema.maxLength !== undefined && value.length > schema.maxLength) add("ARG_MAX_LENGTH", "string is too long");
     if (schema.pattern && !new RegExp(schema.pattern).test(value)) add("ARG_PATTERN", "string does not match the required pattern");
     if (schema.format === "uuid" && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) add("ARG_FORMAT", "value is not a UUID");
+    if (schema.format === "email" && !/^[^\s@]+@[^\s@]+(?:\.[^\s@]+)+$/.test(value)) add("ARG_FORMAT", "value is not an email address");
+    if (schema.format === "uri") {
+      try { new URL(value); } catch { add("ARG_FORMAT", "value is not an absolute URI"); }
+    }
+    if (schema.contentEncoding === "base64" && !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) add("ARG_ENCODING", "value is not valid base64");
   }
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) add("ARG_MIN_ITEMS", "array has too few items");
@@ -193,6 +207,10 @@ export const schemaIssuesWithBindings = (
   path: string,
   captures: Map<string, string>
 ): Diagnostic[] => {
+  if (schema.oneOf) {
+    const matches = schema.oneOf.filter((candidate) => schemaIssuesWithBindings(candidate, value, path, captures).length === 0).length;
+    if (matches !== 1) return [{ code: "ARG_ONE_OF", path, message: "value must match exactly one allowed schema" }];
+  }
   const ref = binding(value);
   if (ref) {
     if (ref.kind === "capture" && !captures.has(ref.value)) return [{ code: "CAPTURE_FORWARD_REF", path, message: "capture must come from an earlier successful case" }];
