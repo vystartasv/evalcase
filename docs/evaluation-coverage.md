@@ -16,6 +16,7 @@ Coverage here means local pack definition and validation only. No action has fre
 | `sharepoint-site-create.automation-pack.json` | `deployment_site_create` | locally validated; one-time exact URL/title/owner confirmation; not live-verified |
 | `sharepoint-site-read.automation-pack.json` | `deployment_site_lists`, `deployment_recycle_bin_assess` | locally validated; exact-site target; not live-verified |
 | `control-plane-readonly.automation-pack.json` | `work_list`, `automation_list`, `automation_templates`, `automation_inbox`, `settings_read`, `diagnostics_status`, `diagnostics_export`, `integrations_list`, `agents_list` | locally validated; service-scope target; not live-verified |
+| `control-plane-work-list.automation-pack.json` and `control-plane-readonly-remainder.automation-pack.json` | same nine reads split as one isolated `work_list` and an independent eight-action remainder | locally validated with separate matchers; lets a dispatcher regression in the first action leave the other read evidence runnable |
 | `work-results-read.automation-pack.json` | `work_results` | locally validated; exact work-item target; not live-verified |
 | `feed-read.automation-pack.json` | `feed_read` | locally validated; exact subscriber target; not live-verified |
 

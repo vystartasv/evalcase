@@ -1,0 +1,28 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "control-plane-work-list-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Control Plane isolated work list read",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "automation-api",
+      "bindings": [
+        "scope"
+      ]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "work.list",
+        "operation": "work_list",
+        "arguments": {}
+      }
+    ]
+  }
+}

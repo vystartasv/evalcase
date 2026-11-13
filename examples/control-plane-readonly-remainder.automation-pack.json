@@ -1,0 +1,70 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "control-plane-readonly-remainder-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Control Plane read-only remainder",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "automation-api",
+      "bindings": [
+        "scope"
+      ]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "automation.list",
+        "operation": "automation_list",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "automation.templates",
+        "operation": "automation_templates",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "automation.inbox",
+        "operation": "automation_inbox",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "settings.read",
+        "operation": "settings_read",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "diagnostics.status",
+        "operation": "diagnostics_status",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "diagnostics.export",
+        "operation": "diagnostics_export",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "integrations.list",
+        "operation": "integrations_list",
+        "arguments": {}
+      },
+      {
+        "type": "integration-action",
+        "id": "agents.list",
+        "operation": "agents_list",
+        "arguments": {}
+      }
+    ]
+  }
+}
