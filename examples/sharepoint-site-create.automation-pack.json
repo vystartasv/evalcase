@@ -1,0 +1,42 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-site-create-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Create one confirmed WorksWithAgents dev site",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "site",
+      "bindings": ["siteUrl", "title", "owner", "description", "connectionVersion"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "site.create",
+        "operation": "deployment_site_create",
+        "arguments": {
+          "siteUrl": { "$target": "siteUrl" },
+          "title": { "$target": "title" },
+          "template": "STS#3",
+          "owner": { "$target": "owner" },
+          "description": { "$target": "description" },
+          "confirmed": true,
+          "confirmation": {
+            "connectionVersion": { "$target": "connectionVersion" },
+            "siteUrl": { "$target": "siteUrl" },
+            "title": { "$target": "title" },
+            "template": "STS#3",
+            "owner": { "$target": "owner" },
+            "description": { "$target": "description" }
+          }
+        },
+        "capture": { "jobId": "/id" }
+      }
+    ]
+  }
+}

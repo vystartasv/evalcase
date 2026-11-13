@@ -36,13 +36,14 @@ export const parseAutomationPack = (value: unknown, inventory: OperationInventor
   const operations = new Map(inventory.actions.map((action) => [action.name, action]));
   const all = stepsOf(automation.steps);
   const usedBindings = targetRefs(automation.steps);
-  if (usedBindings.size !== declaredBindings.length || [...usedBindings].some((name) => !declaredBindings.includes(name))) add("AUTOMATION_BINDINGS", "$.automation.target.bindings", "declared bindings must exactly match the target references used by actions");
+  if ((usedBindings.size > 0 && (usedBindings.size !== declaredBindings.length || [...usedBindings].some((name) => !declaredBindings.includes(name)))) || (usedBindings.size === 0 && declaredBindings.length !== 1)) add("AUTOMATION_BINDINGS", "$.automation.target.bindings", "bindings must match action references, or declare one explicit service-scope binding for argument-free reads");
   const captures = new Map<string, string>();
+  const createdCaptures = new Map<string, string>();
   const stepIds = new Set<string>();
   const loggedActions = new Map<string, string>();
   if (!Array.isArray(automation.steps) || all.length === 0 || all.length > 100) add("AUTOMATION_STEPS", "$.automation.steps", "workflow must contain 1–100 ordered steps");
   let budget = 0;
-  const walk = (steps: Record<string, unknown>[], depth: number, path: string): void => {
+  const walk = (steps: Record<string, unknown>[], depth: number, path: string, cleanupPhase = false): void => {
     if (depth > 4) add("AUTOMATION_DEPTH", path, "control-flow nesting exceeds four levels");
     for (let i = 0; i < steps.length; i += 1) {
       budget += 1;
@@ -58,16 +59,30 @@ export const parseAutomationPack = (value: unknown, inventory: OperationInventor
         else loggedActions.set(operation.name, replayMode(operation));
         if (!record(step.arguments)) add("AUTOMATION_ARGUMENTS", `${at}.arguments`, "connected action arguments must be an object");
         const refs = targetRefs(step.arguments);
-        if (!refs.size) add("AUTOMATION_BINDING", `${at}.arguments`, "connected action must use an explicit target binding");
+        if (!refs.size && (!operation?.readOnly || Object.keys(record(step.arguments) ? step.arguments : {}).length > 0)) add("AUTOMATION_BINDING", `${at}.arguments`, "only argument-free repeatable reads may use a confirmed service-scope target without an argument binding");
         if ([...refs].some((ref) => !declaredBindings.includes(ref))) add("AUTOMATION_BINDING", `${at}.arguments`, "target reference is absent from the declared bindings");
         if (operation && record(step.arguments)) {
           for (const issue of schemaIssuesWithBindings(operation.inputSchema, step.arguments, `${at}.arguments`, captures)) add(issue.code, issue.path, issue.message);
+          const resourceIdField = operation.resource?.kind === "sharepoint-list" ? "listId"
+            : operation.resource?.kind === "sharepoint-list-item" ? "itemId" : undefined;
+          if (cleanupPhase && operation.resource?.effect === "delete" && resourceIdField) {
+            const ref = record(step.arguments[resourceIdField]) && typeof step.arguments[resourceIdField].$capture === "string"
+              ? step.arguments[resourceIdField].$capture as string : "";
+            if (!ref || createdCaptures.get(ref) !== operation.resource.kind) add("AUTOMATION_CLEANUP_OWNERSHIP", `${at}.arguments.${resourceIdField}`, "cleanup must delete an ID captured from a matching create earlier in this run");
+          }
         }
         if (step.capture !== undefined) {
           if (!record(step.capture) || Object.keys(step.capture).length > 20) add("AUTOMATION_CAPTURE", `${at}.capture`, "captures must be an object with at most 20 named JSON pointers");
           else for (const [name, pointer] of Object.entries(step.capture)) {
             if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(name) || typeof pointer !== "string" || (pointer !== "" && pointer !== "$status" && !pointer.startsWith("/"))) add("AUTOMATION_CAPTURE", `${at}.capture.${name}`, "capture needs a valid name and JSON pointer");
-            else captures.set(`${step.id}.${name}`, pointer === "$status" ? "number" : "string");
+            else {
+              const ref = `${step.id}.${name}`;
+              captures.set(ref, pointer === "$status" ? "number" : "string");
+              const ownedKind = operation?.name === "deployment_site_list_create" && pointer === "/id" ? "sharepoint-list"
+                : operation?.name === "deployment_list_item_create" && pointer === "/id" ? "sharepoint-list-item"
+                  : operation?.name === "deployment_list_items_batch_create" && /^\/items\/\d+\/item\/id$/.test(pointer) ? "sharepoint-list-item" : undefined;
+              if (ownedKind) createdCaptures.set(ref, ownedKind);
+            }
           }
         }
       } else if (step.type === "finalize") {
@@ -75,7 +90,7 @@ export const parseAutomationPack = (value: unknown, inventory: OperationInventor
         if (Object.keys(step).some((key) => !["type", "steps", "cleanup"].includes(key))) add("AUTOMATION_STEP_FIELD", at, "finalizer contains unsupported fields");
         if (stepsOf(step.steps).length === 0 || stepsOf(step.cleanup).length === 0) add("AUTOMATION_STEP_FIELD", at, "finalizer requires non-empty body and cleanup steps");
         walk(stepsOf(step.steps), depth + 1, `${at}.steps`);
-        walk(stepsOf(step.cleanup), depth + 1, `${at}.cleanup`);
+        walk(stepsOf(step.cleanup), depth + 1, `${at}.cleanup`, true);
       } else if (step.type === "condition") {
         loggedActions.set("Select condition branch", "repeatable-control");
         if (Object.keys(step).some((key) => !["type", "path", "operator", "value", "then", "else"].includes(key))) add("AUTOMATION_STEP_FIELD", at, "condition contains unsupported fields");
@@ -88,10 +103,13 @@ export const parseAutomationPack = (value: unknown, inventory: OperationInventor
           if (!captures.has(ref)) add("CAPTURE_FORWARD_REF", `${at}.path`, "condition capture must come from an earlier action");
         }
         const before = new Map(captures);
-        walk(stepsOf(step.then), depth + 1, `${at}.then`);
+        const createdBefore = new Map(createdCaptures);
+        walk(stepsOf(step.then), depth + 1, `${at}.then`, cleanupPhase);
         for (const key of [...captures.keys()]) if (!before.has(key)) captures.delete(key);
-        walk(stepsOf(step.else), depth + 1, `${at}.else`);
+        for (const key of [...createdCaptures.keys()]) if (!createdBefore.has(key)) createdCaptures.delete(key);
+        walk(stepsOf(step.else), depth + 1, `${at}.else`, cleanupPhase);
         for (const key of [...captures.keys()]) if (!before.has(key)) captures.delete(key);
+        for (const key of [...createdCaptures.keys()]) if (!createdBefore.has(key)) createdCaptures.delete(key);
       } else if (step.type === "repeat" || step.type === "timeout" || step.type === "loop") {
         loggedActions.set(step.type === "repeat" ? "Repeat steps" : step.type === "loop" ? "Loop steps" : "Run steps with timeout", "repeatable-control");
         const fields = step.type === "repeat" ? ["type", "count", "steps"] : step.type === "loop" ? ["type", "maxIterations", "condition", "steps"] : ["type", "durationMs", "steps"];
@@ -112,8 +130,10 @@ export const parseAutomationPack = (value: unknown, inventory: OperationInventor
           }
         }
         const before = step.type === "loop" ? new Map(captures) : undefined;
-        walk(stepsOf(step.steps), depth + 1, `${at}.steps`);
+        const createdBefore = step.type === "loop" ? new Map(createdCaptures) : undefined;
+        walk(stepsOf(step.steps), depth + 1, `${at}.steps`, cleanupPhase);
         if (before) for (const key of [...captures.keys()]) if (!before.has(key)) captures.delete(key);
+        if (createdBefore) for (const key of [...createdCaptures.keys()]) if (!createdBefore.has(key)) createdCaptures.delete(key);
       } else if (step.type === "delay") {
         loggedActions.set("Wait", "repeatable-control");
         if (Object.keys(step).some((key) => !["type", "durationMs"].includes(key))) add("AUTOMATION_STEP_FIELD", at, "delay contains unsupported fields");

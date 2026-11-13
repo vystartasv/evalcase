@@ -5,6 +5,7 @@ export type Schema = {
   properties?: Record<string, Schema>;
   required?: string[];
   items?: Schema;
+  oneOf?: Schema[];
   additionalProperties?: boolean;
   enum?: JsonValue[];
   const?: JsonValue;
@@ -12,6 +13,9 @@ export type Schema = {
   maxLength?: number;
   pattern?: string;
   format?: string;
+  contentEncoding?: string;
+  minimum?: number;
+  maximum?: number;
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
@@ -112,7 +116,8 @@ export type CoverageRow = {
   livePolicy: Operation["livePolicy"];
   positiveCase: boolean;
   rejectionCase: boolean;
-  status: "unsafe" | "gated-uncovered" | "one-time-confirmation-required" | "uncovered" | "pack-defined-not-live-verified";
+  safeCaseCoverage: "positive" | "schema-rejection" | "none";
+  status: "unsafe" | "gated-uncovered" | "one-time-confirmation-required" | "uncovered" | "schema-guarded" | "pack-defined-not-live-verified" | "live-verified";
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -148,11 +153,21 @@ const schemaIssues = (schema: Schema, value: unknown, path: string): Diagnostic[
   }
   if (schema.const !== undefined && JSON.stringify(schema.const) !== JSON.stringify(value)) add("ARG_CONST", "value does not match required constant");
   if (schema.enum && !schema.enum.some((candidate) => JSON.stringify(candidate) === JSON.stringify(value))) add("ARG_ENUM", "value is outside the allowed set");
+  if (schema.oneOf && schema.oneOf.filter((candidate) => schemaIssues(candidate, value, path).length === 0).length !== 1) add("ARG_ONE_OF", "value must match exactly one allowed schema");
+  if (typeof value === "number") {
+    if (schema.minimum !== undefined && value < schema.minimum) add("ARG_MINIMUM", "number is below the minimum");
+    if (schema.maximum !== undefined && value > schema.maximum) add("ARG_MAXIMUM", "number is above the maximum");
+  }
   if (typeof value === "string") {
     if (schema.minLength !== undefined && value.length < schema.minLength) add("ARG_MIN_LENGTH", "string is too short");
     if (schema.maxLength !== undefined && value.length > schema.maxLength) add("ARG_MAX_LENGTH", "string is too long");
     if (schema.pattern && !new RegExp(schema.pattern).test(value)) add("ARG_PATTERN", "string does not match the required pattern");
     if (schema.format === "uuid" && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) add("ARG_FORMAT", "value is not a UUID");
+    if (schema.format === "email" && !/^[^\s@]+@[^\s@]+(?:\.[^\s@]+)+$/.test(value)) add("ARG_FORMAT", "value is not an email address");
+    if (schema.format === "uri") {
+      try { new URL(value); } catch { add("ARG_FORMAT", "value is not an absolute URI"); }
+    }
+    if (schema.contentEncoding === "base64" && !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) add("ARG_ENCODING", "value is not valid base64");
   }
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) add("ARG_MIN_ITEMS", "array has too few items");
@@ -193,6 +208,12 @@ export const schemaIssuesWithBindings = (
   path: string,
   captures: Map<string, string>
 ): Diagnostic[] => {
+  const out: Diagnostic[] = [];
+  const add = (code: string, message: string) => out.push({ code, path, message });
+  if (schema.oneOf) {
+    const matches = schema.oneOf.filter((candidate) => schemaIssuesWithBindings(candidate, value, path, captures).length === 0).length;
+    if (matches !== 1) add("ARG_ONE_OF", "value must match exactly one allowed schema");
+  }
   const ref = binding(value);
   if (ref) {
     if (ref.kind === "capture" && !captures.has(ref.value)) return [{ code: "CAPTURE_FORWARD_REF", path, message: "capture must come from an earlier successful case" }];
@@ -200,21 +221,50 @@ export const schemaIssuesWithBindings = (
     if (schema.type && refType && schema.type !== refType && !(schema.type === "number" && refType === "number")) {
       return [{ code: "BINDING_TYPE", path, message: `binding type ${refType} does not match ${schema.type}` }];
     }
-    return [];
+    if (schema.const !== undefined || schema.enum !== undefined) {
+      add("BINDING_CONSTRAINT", "dynamic bindings cannot prove const or enum constraints");
+    }
+    return out;
   }
-  if (Array.isArray(value) && schema.items) return value.flatMap((item, index) => schemaIssuesWithBindings(schema.items!, item, `${path}[${index}]`, captures));
+  const matchesType = schema.type === "integer"
+    ? typeof value === "number" && Number.isSafeInteger(value)
+    : schema.type === "number" ? typeof value === "number" : !schema.type || typeOf(value) === schema.type;
+  if (!matchesType) return [{ code: "ARG_TYPE", path, message: `expected ${schema.type}` }];
+  if (schema.const !== undefined && JSON.stringify(schema.const) !== JSON.stringify(value)) add("ARG_CONST", "value does not match required constant");
+  if (schema.enum && !schema.enum.some((candidate) => JSON.stringify(candidate) === JSON.stringify(value))) add("ARG_ENUM", "value is outside the allowed set");
+  if (typeof value === "number") {
+    if (schema.minimum !== undefined && value < schema.minimum) add("ARG_MINIMUM", "number is below the minimum");
+    if (schema.maximum !== undefined && value > schema.maximum) add("ARG_MAXIMUM", "number is above the maximum");
+  }
+  if (typeof value === "string") {
+    if (schema.minLength !== undefined && value.length < schema.minLength) add("ARG_MIN_LENGTH", "string is too short");
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) add("ARG_MAX_LENGTH", "string is too long");
+    if (schema.pattern && !new RegExp(schema.pattern).test(value)) add("ARG_PATTERN", "string does not match the required pattern");
+    if (schema.format === "uuid" && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) add("ARG_FORMAT", "value is not a UUID");
+    if (schema.format === "email" && !/^[^\s@]+@[^\s@]+(?:\.[^\s@]+)+$/.test(value)) add("ARG_FORMAT", "value is not an email address");
+    if (schema.format === "uri") {
+      try { new URL(value); } catch { add("ARG_FORMAT", "value is not an absolute URI"); }
+    }
+    if (schema.contentEncoding === "base64" && !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) add("ARG_ENCODING", "value is not valid base64");
+  }
+  if (Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) add("ARG_MIN_ITEMS", "array has too few items");
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) add("ARG_MAX_ITEMS", "array has too many items");
+    if (schema.uniqueItems && new Set(value.map((item) => JSON.stringify(item))).size !== value.length) add("ARG_UNIQUE", "array values must be unique");
+    if (schema.items) value.forEach((item, index) => out.push(...schemaIssuesWithBindings(schema.items!, item, `${path}[${index}]`, captures)));
+  }
   if (isRecord(value)) {
     const properties = schema.properties ?? {};
-    const out: Diagnostic[] = [];
     for (const name of schema.required ?? []) if (!(name in value)) out.push({ code: "ARG_REQUIRED", path: `${path}.${name}`, message: "required argument is missing" });
+    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties) add("ARG_MIN_PROPERTIES", "object has too few properties");
+    if (schema.maxProperties !== undefined && Object.keys(value).length > schema.maxProperties) add("ARG_MAX_PROPERTIES", "object has too many properties");
     for (const [name, item] of Object.entries(value)) {
       const child = properties[name];
       if (child) out.push(...schemaIssuesWithBindings(child, item, `${path}.${name}`, captures));
       else if (schema.additionalProperties === false) out.push({ code: "ARG_UNKNOWN", path: `${path}.${name}`, message: "argument is not supported" });
     }
-    return out;
   }
-  return schemaIssues(schema, value, path);
+  return out;
 };
 
 const contains = (actual: unknown, expected: unknown): boolean => {
@@ -236,6 +286,8 @@ export const parseOperationInventory = (value: unknown): { value?: OperationInve
       return;
     }
     if (action.automationReplayMode !== undefined && !["repeatable-read", "repeatable-stateless", "once-create", "once-update-etag-required", "once-update-state-required", "once-delete", "once-uncertain"].includes(String(action.automationReplayMode))) diagnostics.push({ code: "INVENTORY_REPLAY_MODE", path: `${path}.automationReplayMode`, message: "unsupported automation replay mode" });
+    if (!["uncovered", "pack-defined-not-live-verified", "live-verified"].includes(String(action.coverage))) diagnostics.push({ code: "INVENTORY_COVERAGE", path: `${path}.coverage`, message: "action requires an explicit coverage status" });
+    if (!["read-only", "run-owned-resource-cleanup-required", "one-time-confirmed-target-required", "gated-outside-authorized-scope", "unsafe-or-not-started"].includes(String(action.livePolicy))) diagnostics.push({ code: "INVENTORY_POLICY", path: `${path}.livePolicy`, message: "action requires an explicit live-test policy" });
     if (names.has(action.name)) diagnostics.push({ code: "INVENTORY_DUPLICATE", path: `${path}.name`, message: "operation name must be unique" });
     names.add(action.name);
   });
@@ -341,7 +393,7 @@ export const parseWorkflowPack = (value: unknown, inventory: OperationInventory)
         }
         const key = `${item.id}.${name}`;
         captures.set(key, spec.type);
-        if (operation.resource?.effect === "create") created.set(key, operation.resource.kind);
+        if ((operation.name === "deployment_site_list_create" || operation.name === "deployment_list_item_create") && spec.path === "/id") created.set(key, operation.resource?.kind ?? "");
       }
     }
   });
@@ -378,6 +430,15 @@ export const parseWorkflowPack = (value: unknown, inventory: OperationInventory)
       const owns = Array.isArray(item.owns) ? item.owns as string[] : [];
       const ownedKinds = owns.map((ref) => created.get(ref)).filter(Boolean);
       if (operation.resource?.kind && ownedKinds.length && !ownedKinds.includes(operation.resource.kind)) diagnostics.push({ code: "CLEANUP_RESOURCE_KIND", path: `${path}.operation`, message: "cleanup operation does not delete a resource created by this run" });
+      const ownedIdField = operation.resource?.kind === "sharepoint-list" ? "listId"
+        : operation.resource?.kind === "sharepoint-list-item" ? "itemId" : undefined;
+      if (ownedIdField) {
+        const reference = binding(item.arguments[ownedIdField]);
+        const capture = reference?.kind === "capture" ? reference.value : "";
+        if (!reference || reference.kind !== "capture" || !owns.includes(capture) || created.get(capture) !== operation.resource?.kind) {
+          diagnostics.push({ code: "CLEANUP_OWNERSHIP", path: `${path}.arguments.${ownedIdField}`, message: "cleanup resource ID must reference the matching run-owned create capture" });
+        }
+      }
       const serialized = JSON.stringify(item.arguments);
       if (/https?:\/\//i.test(serialized)) diagnostics.push({ code: "RAW_URL", path: `${path}.arguments`, message: "packs cannot contain URLs; bind siteUrl to the confirmed run target" });
       const checkSiteBinding = (value: unknown, currentPath: string): void => {
@@ -399,13 +460,17 @@ export const coverageReport = (pack: WorkflowPack, inventory: OperationInventory
   const operations = new Map(inventory.actions.map((action) => [action.name, action]));
   return inventory.actions.map((operation) => {
     const cases = pack.cases.filter((item) => item.operation === operation.name);
-    const positiveCase = cases.some((item) => item.kind === "positive");
+    const positiveCase = cases.some((item) => item.kind === "positive") || operation.coverage === "pack-defined-not-live-verified" || operation.coverage === "live-verified";
     const rejectionCase = cases.some((item) => item.kind === "expected-rejection");
+    const safeCaseCoverage = cases.some((item) => item.kind === "positive") ? "positive"
+      : rejectionCase ? "schema-rejection" : "none";
     const status = operation.livePolicy === "unsafe-or-not-started" ? "unsafe"
       : operation.livePolicy === "gated-outside-authorized-scope" ? "gated-uncovered"
       : operation.livePolicy === "one-time-confirmed-target-required" ? "one-time-confirmation-required"
-      : positiveCase && rejectionCase ? "pack-defined-not-live-verified" : "uncovered";
-    return { operation: operation.name, livePolicy: operations.get(operation.name)!.livePolicy, positiveCase, rejectionCase, status };
+      : operation.coverage === "live-verified" ? "live-verified"
+      : positiveCase ? "pack-defined-not-live-verified"
+      : rejectionCase ? "schema-guarded" : "uncovered";
+    return { operation: operation.name, livePolicy: operations.get(operation.name)!.livePolicy, positiveCase, rejectionCase, safeCaseCoverage, status };
   });
 };
 

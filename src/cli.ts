@@ -64,13 +64,20 @@ const checkWorkflowPack = async (inventoryPath: string, packPath: string, json: 
     if (json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     else {
       const defined = coverage.filter((item) => item.status === "pack-defined-not-live-verified");
+      const schemaGuarded = coverage.filter((item) => item.status === "schema-guarded");
+      const liveVerified = coverage.filter((item) => item.status === "live-verified");
       const uncovered = coverage.filter((item) => item.status === "uncovered");
       const unsafe = coverage.filter((item) => item.status === "unsafe");
       const oneTime = coverage.filter((item) => item.status === "one-time-confirmation-required");
       const gated = coverage.filter((item) => item.status === "gated-uncovered");
+      const safeCovered = coverage.filter((item) => item.safeCaseCoverage !== "none");
+      const schemaRejections = coverage.filter((item) => item.safeCaseCoverage === "schema-rejection");
       process.stdout.write(`VALID PACK (not run): ${pack.value.name}\n`);
       process.stdout.write(`Cases: ${pack.value.cases.length}; inventory operations: ${inventory.value.actions.length}\n`);
+      process.stdout.write(`Safe case coverage (${safeCovered.length}/${coverage.length}): ${schemaRejections.length} schema-rejection, ${safeCovered.length - schemaRejections.length} positive\n`);
       process.stdout.write(`Pack-defined, not live-verified (${defined.length}): ${defined.map((item) => item.operation).join(", ") || "none"}\n`);
+      process.stdout.write(`Schema-guarded only in this pack (${schemaGuarded.length}): ${schemaGuarded.map((item) => item.operation).join(", ") || "none"}\n`);
+      process.stdout.write(`Live-verified (${liveVerified.length}): ${liveVerified.map((item) => item.operation).join(", ") || "none"}\n`);
       process.stdout.write(`Uncovered (${uncovered.length}): ${uncovered.map((item) => item.operation).join(", ") || "none"}\n`);
       process.stdout.write(`Unsafe or not started (${unsafe.length}): ${unsafe.map((item) => item.operation).join(", ") || "none"}\n`);
       process.stdout.write(`One-time confirmation required (${oneTime.length}): ${oneTime.map((item) => item.operation).join(", ") || "none"}\n`);

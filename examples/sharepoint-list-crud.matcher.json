@@ -4,7 +4,7 @@
   "id": "sharepoint-list-crud-run-v1",
   "run": {
     "state": "succeeded",
-    "stepCount": 19
+    "stepCount": 25
   },
   "steps": [
     {
@@ -93,24 +93,24 @@
     },
     {
       "position": 12,
+      "action": "deployment_list_items_batch_create",
+      "state": "succeeded",
+      "replayMode": "once-create",
+      "messageContains": "deployment_list_items_batch_create returned HTTP 200"
+    },
+    {
+      "position": 13,
+      "action": "deployment_list_items_batch_update",
+      "state": "succeeded",
+      "replayMode": "once-update-etag-required",
+      "messageContains": "deployment_list_items_batch_update returned HTTP 200"
+    },
+    {
+      "position": 14,
       "action": "deployment_list_items_batch",
       "state": "succeeded",
       "replayMode": "repeatable-read",
       "messageContains": "deployment_list_items_batch returned HTTP 200"
-    },
-    {
-      "position": 13,
-      "action": "deployment_list_item_read",
-      "state": "succeeded",
-      "replayMode": "repeatable-read",
-      "messageContains": "deployment_list_item_read returned HTTP 200"
-    },
-    {
-      "position": 14,
-      "action": "deployment_list_item_update",
-      "state": "succeeded",
-      "replayMode": "once-update-etag-required",
-      "messageContains": "deployment_list_item_update returned HTTP 200"
     },
     {
       "position": 15,
@@ -121,20 +121,62 @@
     },
     {
       "position": 16,
+      "action": "deployment_list_item_update",
+      "state": "succeeded",
+      "replayMode": "once-update-etag-required",
+      "messageContains": "deployment_list_item_update returned HTTP 200"
+    },
+    {
+      "position": 17,
+      "action": "deployment_list_item_read",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_list_item_read returned HTTP 200"
+    },
+    {
+      "position": 18,
       "action": "deployment_list_item_delete",
       "state": "succeeded",
       "replayMode": "once-delete",
       "messageContains": "deployment_list_item_delete returned HTTP 200"
     },
     {
-      "position": 17,
+      "position": 19,
       "action": "Select condition branch",
       "state": "succeeded",
       "replayMode": "repeatable-control",
       "messageContains": "yes branch"
     },
     {
-      "position": 18,
+      "position": 20,
+      "action": "deployment_list_item_read",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_list_item_read returned HTTP 200"
+    },
+    {
+      "position": 21,
+      "action": "deployment_list_item_delete",
+      "state": "succeeded",
+      "replayMode": "once-delete",
+      "messageContains": "deployment_list_item_delete returned HTTP 200"
+    },
+    {
+      "position": 22,
+      "action": "Select condition branch",
+      "state": "succeeded",
+      "replayMode": "repeatable-control",
+      "messageContains": "yes branch"
+    },
+    {
+      "position": 23,
+      "action": "Select condition branch",
+      "state": "succeeded",
+      "replayMode": "repeatable-control",
+      "messageContains": "yes branch"
+    },
+    {
+      "position": 24,
       "action": "deployment_site_list_delete",
       "state": "succeeded",
       "replayMode": "once-delete",

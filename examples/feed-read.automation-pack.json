@@ -1,0 +1,33 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "feed-read-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Read one exact notification feed",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "subscriber",
+      "bindings": [
+        "subscriberId"
+      ]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "feed.read",
+        "operation": "feed_read",
+        "arguments": {
+          "subscriber": {
+            "$target": "subscriberId"
+          },
+          "after": 0
+        }
+      }
+    ]
+  }
+}

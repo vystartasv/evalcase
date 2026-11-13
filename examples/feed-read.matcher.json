@@ -1,0 +1,18 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "feed-read-run-v1",
+  "run": {
+    "state": "succeeded",
+    "stepCount": 1
+  },
+  "steps": [
+    {
+      "position": 0,
+      "action": "feed_read",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "feed_read returned HTTP 200"
+    }
+  ]
+}

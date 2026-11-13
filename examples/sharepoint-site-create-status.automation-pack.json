@@ -1,0 +1,27 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-site-create-status-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Read one exact SharePoint site creation job",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "site-create-job",
+      "bindings": ["jobId"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "site-create.status",
+        "operation": "deployment_site_create_status",
+        "arguments": { "jobId": { "$target": "jobId" } },
+        "capture": { "state": "/state" }
+      }
+    ]
+  }
+}

@@ -1,0 +1,2114 @@
+{
+  "format": "evalcase.workflow-pack",
+  "version": 1,
+  "id": "control-plane-mcp-schema-guards-v1",
+  "name": "Control Plane MCP API schema guards",
+  "inventory": {
+    "id": "control-plane-mcp-v1",
+    "version": 1
+  },
+  "trigger": {
+    "type": "manual"
+  },
+  "target": {
+    "type": "connected-integration",
+    "service": "control-plane",
+    "resourceType": "workspace",
+    "bindings": [
+      "siteUrl"
+    ]
+  },
+  "cases": [
+    {
+      "id": "work_list.unknown-field-rejected",
+      "operation": "work_list",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_results.unknown-field-rejected",
+      "operation": "work_results",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_group.unknown-field-rejected",
+      "operation": "work_group",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_create.unknown-field-rejected",
+      "operation": "work_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_send.unknown-field-rejected",
+      "operation": "work_send",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_close.unknown-field-rejected",
+      "operation": "work_close",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_retry_mail.unknown-field-rejected",
+      "operation": "work_retry_mail",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_save_template.unknown-field-rejected",
+      "operation": "work_save_template",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_use_template.unknown-field-rejected",
+      "operation": "work_use_template",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_template_enabled.unknown-field-rejected",
+      "operation": "work_template_enabled",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_invite_account.unknown-field-rejected",
+      "operation": "work_invite_account",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_account_enabled.unknown-field-rejected",
+      "operation": "work_account_enabled",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_list.unknown-field-rejected",
+      "operation": "automation_list",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_templates.unknown-field-rejected",
+      "operation": "automation_templates",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_connection.unknown-field-rejected",
+      "operation": "automation_connection",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_preview.unknown-field-rejected",
+      "operation": "automation_preview",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_inbox.unknown-field-rejected",
+      "operation": "automation_inbox",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_inbox_read.unknown-field-rejected",
+      "operation": "automation_inbox_read",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_failure_recipients.unknown-field-rejected",
+      "operation": "automation_failure_recipients",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_workflow.unknown-field-rejected",
+      "operation": "automation_workflow",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_recovery_decision.unknown-field-rejected",
+      "operation": "automation_recovery_decision",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_subscribe.unknown-field-rejected",
+      "operation": "automation_subscribe",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_workflow_enabled.unknown-field-rejected",
+      "operation": "automation_workflow_enabled",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_subscriber_enabled.unknown-field-rejected",
+      "operation": "automation_subscriber_enabled",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_read.unknown-field-rejected",
+      "operation": "automation_read",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "automation_run.unknown-field-rejected",
+      "operation": "automation_run",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list.unknown-field-rejected",
+      "operation": "deployment_list",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_catalogs.unknown-field-rejected",
+      "operation": "deployment_site_catalogs",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_recycle_bin_assess.unknown-field-rejected",
+      "operation": "deployment_recycle_bin_assess",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_changes.unknown-field-rejected",
+      "operation": "deployment_list_changes",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_lists.unknown-field-rejected",
+      "operation": "deployment_site_lists",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_list_create.unknown-field-rejected",
+      "operation": "deployment_site_list_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_list_rename.unknown-field-rejected",
+      "operation": "deployment_site_list_rename",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_list_delete.unknown-field-rejected",
+      "operation": "deployment_site_list_delete",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_columns.unknown-field-rejected",
+      "operation": "deployment_list_columns",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_column_create.unknown-field-rejected",
+      "operation": "deployment_list_column_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_create.unknown-field-rejected",
+      "operation": "deployment_site_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_create_status.unknown-field-rejected",
+      "operation": "deployment_site_create_status",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_create_continue.unknown-field-rejected",
+      "operation": "deployment_site_create_continue",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_seed.unknown-field-rejected",
+      "operation": "deployment_list_seed",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_seed_status.unknown-field-rejected",
+      "operation": "deployment_list_seed_status",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_seed_continue.unknown-field-rejected",
+      "operation": "deployment_list_seed_continue",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_items.unknown-field-rejected",
+      "operation": "deployment_list_items",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_items_batch.unknown-field-rejected",
+      "operation": "deployment_list_items_batch",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_items_batch_create.unknown-field-rejected",
+      "operation": "deployment_list_items_batch_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_items_batch_update.unknown-field-rejected",
+      "operation": "deployment_list_items_batch_update",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_item_read.unknown-field-rejected",
+      "operation": "deployment_list_item_read",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_item_create.unknown-field-rejected",
+      "operation": "deployment_list_item_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_item_update.unknown-field-rejected",
+      "operation": "deployment_list_item_update",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_list_item_delete.unknown-field-rejected",
+      "operation": "deployment_list_item_delete",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_upload.unknown-field-rejected",
+      "operation": "deployment_upload",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_blueprint_save.unknown-field-rejected",
+      "operation": "deployment_blueprint_save",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_blueprint_plan.unknown-field-rejected",
+      "operation": "deployment_blueprint_plan",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_copy_plan.unknown-field-rejected",
+      "operation": "deployment_copy_plan",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_copy_start.unknown-field-rejected",
+      "operation": "deployment_copy_start",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_copy_continue.unknown-field-rejected",
+      "operation": "deployment_copy_continue",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_page.unknown-field-rejected",
+      "operation": "deployment_page",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_page_status.unknown-field-rejected",
+      "operation": "deployment_page_status",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_page_reconcile.unknown-field-rejected",
+      "operation": "deployment_page_reconcile",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_install.unknown-field-rejected",
+      "operation": "deployment_site_install",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_package.unknown-field-rejected",
+      "operation": "deployment_package",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_status.unknown-field-rejected",
+      "operation": "sharepoint_status",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_list_subscriptions.unknown-field-rejected",
+      "operation": "sharepoint_list_subscriptions",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_subscription_create.unknown-field-rejected",
+      "operation": "sharepoint_subscription_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_subscription_renew.unknown-field-rejected",
+      "operation": "sharepoint_subscription_renew",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_subscription_reconcile.unknown-field-rejected",
+      "operation": "sharepoint_subscription_reconcile",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_handoff.unknown-field-rejected",
+      "operation": "sharepoint_handoff",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_certificate.unknown-field-rejected",
+      "operation": "sharepoint_certificate",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_bootstrap.unknown-field-rejected",
+      "operation": "sharepoint_bootstrap",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_setup_instructions.unknown-field-rejected",
+      "operation": "sharepoint_setup_instructions",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_save_setup.unknown-field-rejected",
+      "operation": "sharepoint_save_setup",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_manual.unknown-field-rejected",
+      "operation": "sharepoint_manual",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_destination.unknown-field-rejected",
+      "operation": "sharepoint_destination",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_attach.unknown-field-rejected",
+      "operation": "sharepoint_attach",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_guide.unknown-field-rejected",
+      "operation": "sharepoint_guide",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_verify.unknown-field-rejected",
+      "operation": "sharepoint_verify",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_rotate.unknown-field-rejected",
+      "operation": "sharepoint_rotate",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_activate.unknown-field-rejected",
+      "operation": "sharepoint_activate",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_rollback.unknown-field-rejected",
+      "operation": "sharepoint_rollback",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_finish_rotation.unknown-field-rejected",
+      "operation": "sharepoint_finish_rotation",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharepoint_disconnect.unknown-field-rejected",
+      "operation": "sharepoint_disconnect",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "settings_read.unknown-field-rejected",
+      "operation": "settings_read",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "settings_save_email.unknown-field-rejected",
+      "operation": "settings_save_email",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "settings_verify_email.unknown-field-rejected",
+      "operation": "settings_verify_email",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostics_status.unknown-field-rejected",
+      "operation": "diagnostics_status",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostics_export.unknown-field-rejected",
+      "operation": "diagnostics_export",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostics_toggle.unknown-field-rejected",
+      "operation": "diagnostics_toggle",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostics_ingest.unknown-field-rejected",
+      "operation": "diagnostics_ingest",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "integrations_list.unknown-field-rejected",
+      "operation": "integrations_list",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "integrations_create.unknown-field-rejected",
+      "operation": "integrations_create",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "integrations_revoke.unknown-field-rejected",
+      "operation": "integrations_revoke",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "agents_list.unknown-field-rejected",
+      "operation": "agents_list",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "feed_read.unknown-field-rejected",
+      "operation": "feed_read",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "event_emit.unknown-field-rejected",
+      "operation": "event_emit",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "deployment_site_uninstall.unknown-field-rejected",
+      "operation": "deployment_site_uninstall",
+      "kind": "expected-rejection",
+      "arguments": {
+        "siteUrl": {
+          "$target": "siteUrl"
+        },
+        "__evalcase_invalid_field": true
+      },
+      "expect": {
+        "outcome": "error",
+        "phase": "mcp-schema",
+        "assertions": [
+          {
+            "op": "exists",
+            "path": "/error",
+            "value": true
+          }
+        ]
+      }
+    }
+  ],
+  "cleanup": []
+}

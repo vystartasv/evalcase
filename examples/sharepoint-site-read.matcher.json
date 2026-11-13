@@ -1,10 +1,10 @@
 {
   "format": "evalcase.automation-run-matcher",
   "version": 1,
-  "id": "sharepoint-site-list-read-run-v1",
+  "id": "sharepoint-site-read-run-v1",
   "run": {
     "state": "succeeded",
-    "stepCount": 1
+    "stepCount": 2
   },
   "steps": [
     {
@@ -13,6 +13,13 @@
       "state": "succeeded",
       "replayMode": "repeatable-read",
       "messageContains": "deployment_site_lists returned HTTP 200"
+    },
+    {
+      "position": 1,
+      "action": "deployment_recycle_bin_assess",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_recycle_bin_assess returned HTTP 200"
     }
   ]
 }

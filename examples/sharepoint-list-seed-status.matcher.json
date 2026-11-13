@@ -1,0 +1,15 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "sharepoint-list-seed-status-run-v1",
+  "run": { "state": "succeeded", "stepCount": 1 },
+  "steps": [
+    {
+      "position": 0,
+      "action": "deployment_list_seed_status",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_list_seed_status returned HTTP 200"
+    }
+  ]
+}

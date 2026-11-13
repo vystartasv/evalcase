@@ -1,0 +1,18 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "work-results-read-run-v1",
+  "run": {
+    "state": "succeeded",
+    "stepCount": 1
+  },
+  "steps": [
+    {
+      "position": 0,
+      "action": "work_results",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "work_results returned HTTP 200"
+    }
+  ]
+}

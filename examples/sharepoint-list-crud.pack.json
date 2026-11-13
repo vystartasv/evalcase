@@ -220,6 +220,56 @@
           },
           {
             "type": "integration-action",
+            "id": "item.batch-create",
+            "operation": "deployment_list_items_batch_create",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "items": [
+                {
+                  "Title": "Evalcase batch item"
+                }
+              ],
+              "confirmed": true
+            },
+            "capture": {
+              "itemId": "/items/0/item/id",
+              "eTag": "/items/0/item/eTag"
+            }
+          },
+          {
+            "type": "integration-action",
+            "id": "item.batch-update",
+            "operation": "deployment_list_items_batch_update",
+            "arguments": {
+              "siteUrl": {
+                "$target": "siteUrl"
+              },
+              "listId": {
+                "$capture": "list.create.listId"
+              },
+              "items": [
+                {
+                  "itemId": {
+                    "$capture": "item.batch-create.itemId"
+                  },
+                  "eTag": {
+                    "$capture": "item.batch-create.eTag"
+                  },
+                  "fields": {
+                    "Title": "Evalcase batch item updated"
+                  }
+                }
+              ],
+              "confirmed": true
+            }
+          },
+          {
+            "type": "integration-action",
             "id": "item.read.before-update",
             "operation": "deployment_list_item_read",
             "arguments": {
@@ -312,14 +362,14 @@
         "cleanup": [
           {
             "type": "condition",
-            "path": "/captures/list.create/listId",
+            "path": "/captures/item.batch-create/itemId",
             "operator": "exists",
             "value": true,
             "then": [
               {
                 "type": "integration-action",
-                "id": "list.delete.valid",
-                "operation": "deployment_site_list_delete",
+                "id": "item.batch-read.before-cleanup",
+                "operation": "deployment_list_item_read",
                 "arguments": {
                   "siteUrl": {
                     "$target": "siteUrl"
@@ -327,14 +377,95 @@
                   "listId": {
                     "$capture": "list.create.listId"
                   },
-                  "currentDisplayName": {
-                    "$target": "renamedListName"
+                  "itemId": {
+                    "$capture": "item.batch-create.itemId"
+                  }
+                },
+                "capture": {
+                  "eTag": "/eTag"
+                }
+              },
+              {
+                "type": "integration-action",
+                "id": "item.batch-delete",
+                "operation": "deployment_list_item_delete",
+                "arguments": {
+                  "siteUrl": {
+                    "$target": "siteUrl"
+                  },
+                  "listId": {
+                    "$capture": "list.create.listId"
+                  },
+                  "itemId": {
+                    "$capture": "item.batch-create.itemId"
+                  },
+                  "eTag": {
+                    "$capture": "item.batch-read.before-cleanup.eTag"
                   },
                   "confirmed": true
                 },
                 "capture": {
                   "deleted": "/deleted"
                 }
+              }
+            ],
+            "else": []
+          },
+          {
+            "type": "condition",
+            "path": "/captures/list.create/listId",
+            "operator": "exists",
+            "value": true,
+            "then": [
+              {
+                "type": "condition",
+                "path": "/captures/list.rename.valid/displayName",
+                "operator": "exists",
+                "value": true,
+                "then": [
+                  {
+                    "type": "integration-action",
+                    "id": "list.delete.renamed",
+                    "operation": "deployment_site_list_delete",
+                    "arguments": {
+                      "siteUrl": {
+                        "$target": "siteUrl"
+                      },
+                      "listId": {
+                        "$capture": "list.create.listId"
+                      },
+                      "currentDisplayName": {
+                        "$capture": "list.rename.valid.displayName"
+                      },
+                      "confirmed": true
+                    },
+                    "capture": {
+                      "deleted": "/deleted"
+                    }
+                  }
+                ],
+                "else": [
+                  {
+                    "type": "integration-action",
+                    "id": "list.delete.original",
+                    "operation": "deployment_site_list_delete",
+                    "arguments": {
+                      "siteUrl": {
+                        "$target": "siteUrl"
+                      },
+                      "listId": {
+                        "$capture": "list.create.listId"
+                      },
+                      "currentDisplayName": {
+                        "$target": "listName"
+                      },
+                      "confirmed": true
+                    },
+                    "capture": {
+                      "deleted": "/deleted"
+                    }
+                  }
+                ]
               }
             ],
             "else": []
