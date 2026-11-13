@@ -101,6 +101,8 @@ describe("portable connected-integration packs", () => {
     expect(new Set(pack.value?.cases.map((item) => item.operation)).size).toBe(95);
     expect(pack.value?.cases.every((item) => item.kind === "expected-rejection" && item.expect.phase === "mcp-schema")).toBe(true);
     const coverage = coverageReport(pack.value!, inventory.value!);
+    expect(coverage.filter((item) => item.safeCaseCoverage === "schema-rejection")).toHaveLength(95);
+    expect(coverage.filter((item) => item.safeCaseCoverage === "none")).toHaveLength(0);
     expect(coverage.filter((item) => item.status === "pack-defined-not-live-verified")).toHaveLength(27);
     expect(coverage.filter((item) => item.status === "schema-guarded")).toHaveLength(2);
     expect(coverage.filter((item) => item.status === "gated-uncovered")).toHaveLength(37);

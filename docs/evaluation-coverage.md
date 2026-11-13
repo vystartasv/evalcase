@@ -2,7 +2,7 @@
 
 Inventory: `control-plane-mcp-v1` v1; 95 actions. Base schemas: `9c2c4499c9f9a1c1538af24d4f4519add12f1b59` in `internal/agentapi/actions.json`; all schema descriptions were synchronized against the current source tree.
 
-Coverage here means local pack definition and validation only. No action has fresh deployed run evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service. A separate batch guard rejects empty create/update arrays. Five read-only APIs now have useful positive calls in ordinary manual automations. Positive SharePoint CRUD remains run-owned and requires cleanup; tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
+Coverage here means local pack definition and validation only. No action has fresh deployed run evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service; this gives all 95 operations safe local case coverage, including operations whose positive calls remain gated. Evalcase reports this separately from positive coverage and live-policy status. A separate batch guard rejects empty create/update arrays. Five read-only APIs now have useful positive calls in ordinary manual automations. Positive SharePoint CRUD remains run-owned and requires cleanup; tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
 
 ## Pack-defined positive coverage
 
@@ -128,6 +128,7 @@ Coverage here means local pack definition and validation only. No action has fre
 
 ## Evidence limits
 
+- Safe local case coverage: 95/95 operations have a schema-rejection case; this does not count as positive or live coverage.
 - Positive local pack definitions: 27 operations.
 - Live-verified operations: 0.
 - Two safe/run-owned operations still have schema-rejection coverage only: `deployment_list_seed` and `deployment_list_seed_continue`; no positive seed job or cleanup pack is defined.

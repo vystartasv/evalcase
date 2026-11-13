@@ -116,6 +116,7 @@ export type CoverageRow = {
   livePolicy: Operation["livePolicy"];
   positiveCase: boolean;
   rejectionCase: boolean;
+  safeCaseCoverage: "positive" | "schema-rejection" | "none";
   status: "unsafe" | "gated-uncovered" | "one-time-confirmation-required" | "uncovered" | "schema-guarded" | "pack-defined-not-live-verified" | "live-verified";
 };
 
@@ -461,13 +462,15 @@ export const coverageReport = (pack: WorkflowPack, inventory: OperationInventory
     const cases = pack.cases.filter((item) => item.operation === operation.name);
     const positiveCase = cases.some((item) => item.kind === "positive") || operation.coverage === "pack-defined-not-live-verified" || operation.coverage === "live-verified";
     const rejectionCase = cases.some((item) => item.kind === "expected-rejection");
+    const safeCaseCoverage = cases.some((item) => item.kind === "positive") ? "positive"
+      : rejectionCase ? "schema-rejection" : "none";
     const status = operation.livePolicy === "unsafe-or-not-started" ? "unsafe"
       : operation.livePolicy === "gated-outside-authorized-scope" ? "gated-uncovered"
       : operation.livePolicy === "one-time-confirmed-target-required" ? "one-time-confirmation-required"
       : operation.coverage === "live-verified" ? "live-verified"
       : positiveCase ? "pack-defined-not-live-verified"
       : rejectionCase ? "schema-guarded" : "uncovered";
-    return { operation: operation.name, livePolicy: operations.get(operation.name)!.livePolicy, positiveCase, rejectionCase, status };
+    return { operation: operation.name, livePolicy: operations.get(operation.name)!.livePolicy, positiveCase, rejectionCase, safeCaseCoverage, status };
   });
 };
 
