@@ -4,7 +4,7 @@
   "id": "sharepoint-site-list-read-v1",
   "automation": {
     "operation": "workflow",
-    "name": "SharePoint site list read",
+    "name": "SharePoint site list and recycle-bin read",
     "action": "steps",
     "triggerType": "manual",
     "enabled": true,
@@ -28,6 +28,16 @@
         },
         "capture": {
           "items": "/items"
+        }
+      },
+      {
+        "type": "integration-action",
+        "id": "recycle-bin.read",
+        "operation": "deployment_recycle_bin_assess",
+        "arguments": {
+          "siteUrl": {
+            "$target": "siteUrl"
+          }
         }
       }
     ]

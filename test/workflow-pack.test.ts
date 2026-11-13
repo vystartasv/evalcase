@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseOperationInventory, parseWorkflowPack, schemaIssuesWithBindings } from "../src/workflow-pack.js";
+import { coverageReport, parseOperationInventory, parseWorkflowPack, schemaIssuesWithBindings } from "../src/workflow-pack.js";
 import { parseAutomationPack } from "../src/automation-pack.js";
 import { matchRunLog, parseRunMatcher } from "../src/run-matcher.js";
 import { readFile } from "node:fs/promises";
@@ -13,6 +13,20 @@ describe("portable connected-integration packs", () => {
     expect(schemaIssuesWithBindings({ type: "string", format: "uri" }, "/relative", "$.url", emptyCaptures).map((issue) => issue.code)).toContain("ARG_FORMAT");
     expect(schemaIssuesWithBindings({ type: "string", contentEncoding: "base64" }, "%%%", "$.body", emptyCaptures).map((issue) => issue.code)).toContain("ARG_ENCODING");
     expect(schemaIssuesWithBindings({ oneOf: [{ type: "string" }, { type: "integer" }] }, true, "$.value", emptyCaptures).map((issue) => issue.code)).toContain("ARG_ONE_OF");
+    expect(schemaIssuesWithBindings({ type: "array", minItems: 2, items: { type: "string", minLength: 2 } }, ["x"], "$.items", emptyCaptures).map((issue) => issue.code)).toEqual(expect.arrayContaining(["ARG_MIN_ITEMS", "ARG_MIN_LENGTH"]));
+    expect(schemaIssuesWithBindings({ type: "object", minProperties: 2, properties: { id: { type: "string" } }, additionalProperties: false }, { id: "x" }, "$.target", emptyCaptures).map((issue) => issue.code)).toContain("ARG_MIN_PROPERTIES");
+    expect(schemaIssuesWithBindings({ type: "string", enum: ["allowed"] }, { $target: "name" }, "$.name", emptyCaptures).map((issue) => issue.code)).toContain("BINDING_CONSTRAINT");
+  });
+
+  test("rejects an invalid extra argument for all 95 catalog actions", async () => {
+    const root = new URL("../", import.meta.url);
+    const inventory = parseOperationInventory(JSON.parse(await readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8")));
+    expect(inventory.value).toBeDefined();
+    expect(inventory.value!.actions).toHaveLength(95);
+    for (const action of inventory.value!.actions) {
+      expect(action.livePolicy).toBeTruthy();
+      expect(schemaIssuesWithBindings(action.inputSchema, { __evalcase_invalid_field: true }, `$.${action.name}`, new Map()).some((issue) => issue.code === "ARG_UNKNOWN")).toBe(true);
+    }
   });
 
   test("validates a normal manual backend automation against a separate run matcher", async () => {
@@ -25,13 +39,89 @@ describe("portable connected-integration packs", () => {
     const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
     expect(inventory.value).toBeDefined();
     expect(inventory.value!.actions).toHaveLength(95);
-    expect(inventory.value!.actions.filter((action) => action.coverage === "pack-defined-not-live-verified")).toHaveLength(13);
+    expect(inventory.value!.actions.filter((action) => action.coverage === "pack-defined-not-live-verified")).toHaveLength(27);
     for (const name of ["automation_recovery_decision", "deployment_site_uninstall"]) {
       expect(inventory.value!.actions.find((action) => action.name === name)?.livePolicy).toBe("gated-outside-authorized-scope");
     }
     const pack = parseAutomationPack(JSON.parse(packRaw), inventory.value!, JSON.parse(matcherRaw));
     expect(pack.diagnostics).toEqual([]);
     expect(pack.value?.automation.triggerType).toBe("manual");
+  });
+
+  test("validates the Control Plane read-only API pack on a service-scope target", async () => {
+    const root = new URL("../", import.meta.url);
+    const [inventoryRaw, packRaw, matcherRaw] = await Promise.all([
+      readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8"),
+      readFile(new URL("examples/control-plane-readonly.automation-pack.json", root), "utf8"),
+      readFile(new URL("examples/control-plane-readonly.matcher.json", root), "utf8")
+    ]);
+    const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
+    expect(inventory.value).toBeDefined();
+    const value = JSON.parse(packRaw);
+    const result = parseAutomationPack(value, inventory.value!, JSON.parse(matcherRaw));
+    expect(result.diagnostics).toEqual([]);
+    const operations = value.automation.steps.map((step: { operation: string }) => step.operation);
+    expect(operations).toEqual(["work_list", "automation_list", "automation_templates", "automation_inbox", "settings_read", "diagnostics_status", "diagnostics_export", "integrations_list", "agents_list"]);
+    expect(operations.every((operation: string) => inventory.value!.actions.find((action) => action.name === operation)?.readOnly)).toBe(true);
+    const matcher = parseRunMatcher(JSON.parse(matcherRaw));
+    expect(matcher).toBeDefined();
+    const log = { state: "succeeded", steps: matcher!.steps.map((step) => ({ position: step.position, action: step.action, state: step.state, replay_mode: step.replayMode, message: step.messageContains })) };
+    expect(matchRunLog(matcher!, log).yes).toBe(true);
+    expect(matchRunLog(matcher!, { ...log, steps: log.steps.slice(1) }).yes).toBe(false);
+  });
+
+  test("validates typed-target read packs and ordinary matchers", async () => {
+    const root = new URL("../", import.meta.url);
+    const inventory = parseOperationInventory(JSON.parse(await readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8")));
+    expect(inventory.value).toBeDefined();
+    for (const [packName, matcherName] of [
+      ["work-results-read.automation-pack.json", "work-results-read.matcher.json"],
+      ["feed-read.automation-pack.json", "feed-read.matcher.json"],
+      ["sharepoint-site-read.automation-pack.json", "sharepoint-site-read.matcher.json"]
+    ]) {
+      const [pack, matcher] = await Promise.all([
+        readFile(new URL(`examples/${packName}`, root), "utf8"),
+        readFile(new URL(`examples/${matcherName}`, root), "utf8")
+      ]);
+      expect(parseAutomationPack(JSON.parse(pack), inventory.value!, JSON.parse(matcher)).diagnostics).toEqual([]);
+    }
+  });
+
+  test("defines a schema-only rejection case for every current MCP operation", async () => {
+    const root = new URL("../", import.meta.url);
+    const [inventoryRaw, packRaw] = await Promise.all([
+      readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8"),
+      readFile(new URL("examples/control-plane-mcp-schema-guards.workflow-pack.json", root), "utf8")
+    ]);
+    const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
+    expect(inventory.value?.actions).toHaveLength(95);
+    const pack = parseWorkflowPack(JSON.parse(packRaw), inventory.value!);
+    expect(pack.diagnostics).toEqual([]);
+    expect(pack.value?.cases).toHaveLength(95);
+    expect(new Set(pack.value?.cases.map((item) => item.operation)).size).toBe(95);
+    expect(pack.value?.cases.every((item) => item.kind === "expected-rejection" && item.expect.phase === "mcp-schema")).toBe(true);
+    const coverage = coverageReport(pack.value!, inventory.value!);
+    expect(coverage.filter((item) => item.status === "pack-defined-not-live-verified")).toHaveLength(27);
+    expect(coverage.filter((item) => item.status === "schema-guarded")).toHaveLength(2);
+    expect(coverage.filter((item) => item.status === "gated-uncovered")).toHaveLength(37);
+    expect(coverage.filter((item) => item.status === "unsafe")).toHaveLength(27);
+    expect(coverage.filter((item) => item.status === "one-time-confirmation-required")).toHaveLength(2);
+  });
+
+  test("keeps batch item write schema guards runnable without external writes", async () => {
+    const root = new URL("../", import.meta.url);
+    const [inventoryRaw, packRaw] = await Promise.all([
+      readFile(new URL("catalog/sharepoint-mcp-v1.json", root), "utf8"),
+      readFile(new URL("examples/sharepoint-batch-item-guards.workflow-pack.json", root), "utf8")
+    ]);
+    const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
+    expect(inventory.value).toBeDefined();
+    const pack = parseWorkflowPack(JSON.parse(packRaw), inventory.value!);
+    expect(pack.diagnostics).toEqual([]);
+    expect(pack.value?.cases.map((item) => [item.operation, item.kind, item.expect.phase])).toEqual([
+      ["deployment_list_items_batch_create", "expected-rejection", "mcp-schema"],
+      ["deployment_list_items_batch_update", "expected-rejection", "mcp-schema"]
+    ]);
   });
 
   test("validates one manual CRUD automation and keeps checks in the separate matcher", async () => {
@@ -46,6 +136,9 @@ describe("portable connected-integration packs", () => {
     const packValue = JSON.parse(packRaw);
     const matcher = JSON.parse(matcherRaw);
     expect(parseAutomationPack(packValue, inventory.value!, matcher).diagnostics).toEqual([]);
+    const unrelatedCleanupID = structuredClone(packValue);
+    unrelatedCleanupID.automation.steps[0].cleanup[1].then[0].then[0].arguments.listId = { $target: "siteUrl" };
+    expect(parseAutomationPack(unrelatedCleanupID, inventory.value!, matcher).diagnostics.some((issue) => issue.code === "AUTOMATION_CLEANUP_OWNERSHIP")).toBe(true);
     const wrongReplay = structuredClone(matcher);
     wrongReplay.steps[1].replayMode = "repeatable-stateless";
     expect(parseAutomationPack(packValue, inventory.value!, wrongReplay).diagnostics.some((issue) => issue.code === "MATCHER_REPLAY_MODE")).toBe(true);
@@ -71,6 +164,8 @@ describe("portable connected-integration packs", () => {
     expect(operations).toContain("deployment_list_items");
     expect(operations).toContain("deployment_site_list_rename");
     expect(operations).toContain("deployment_list_item_create");
+    expect(operations).toContain("deployment_list_items_batch_create");
+    expect(operations).toContain("deployment_list_items_batch_update");
     expect(operations).toContain("deployment_list_items_batch");
     expect(operations).toContain("deployment_list_item_read");
     expect(operations).toContain("deployment_list_item_update");
@@ -120,6 +215,66 @@ describe("portable connected-integration packs", () => {
       { position: 6, action: "deployment_site_list_delete", state: "succeeded", replay_mode: "once-delete", message: "Action deployment_site_list_delete returned HTTP 200 and captured 1 value(s)." }
     ] }).yes).toBe(false);
     expect(matchRunLog(matcher!, { state: "failed", steps: [{ position: 0, action: "Finalize workflow", state: "failed" }] }).yes).toBe(false);
+  });
+
+  test("matcher can prove a selected recovery decision and forbid unsafe write retries", () => {
+    const matcher = parseRunMatcher({
+      format: "evalcase.automation-run-matcher",
+      version: 1,
+      id: "uncertain-create-recovery-v1",
+      run: { state: "needs-review", stepCount: 1 },
+      steps: [{
+        position: 0,
+        action: "deployment_site_list_create",
+        state: "needs-review",
+        replayMode: "once-create",
+        recovery: { operation: "deployment_site_list_create", optionsInclude: ["inspect-result"], optionsExclude: ["retry", "retry-after-delay"], decision: "inspect-result" }
+      }]
+    });
+    expect(matcher).toBeDefined();
+    const run = { state: "needs-review", steps: [{
+      position: 0,
+      action: "deployment_site_list_create",
+      state: "needs-review",
+      replay_mode: "once-create",
+      recovery: { operation: "deployment_site_list_create", options: [{ id: "inspect-result" }, { id: "ask-human" }] },
+      recoveryDecision: "inspect-result"
+    }] };
+    expect(matchRunLog(matcher!, run).yes).toBe(true);
+    const unsafe = structuredClone(run);
+    unsafe.steps[0]!.recovery.options.push({ id: "retry" });
+    expect(matchRunLog(matcher!, unsafe).yes).toBe(false);
+    const undecided = structuredClone(run);
+    undecided.steps[0]!.recoveryDecision = "";
+    expect(matchRunLog(matcher!, undecided).yes).toBe(false);
+  });
+
+  test("matcher enforces delayed-only recovery after throttling", () => {
+    const matcher = parseRunMatcher({
+      format: "evalcase.automation-run-matcher",
+      version: 1,
+      id: "throttled-read-recovery-v1",
+      run: { state: "failed", stepCount: 1 },
+      steps: [{
+        position: 0,
+        action: "deployment_list_columns",
+        state: "failed",
+        replayMode: "repeatable-read",
+        recovery: { operation: "deployment_list_columns", optionsInclude: ["retry-after-delay"], optionsExclude: ["retry"] }
+      }]
+    });
+    expect(matcher).toBeDefined();
+    const run = { state: "failed", steps: [{
+      position: 0,
+      action: "deployment_list_columns",
+      state: "failed",
+      replay_mode: "repeatable-read",
+      recovery: { operation: "deployment_list_columns", reason: "The connected service asked you to wait 17 seconds before retrying.", options: [{ id: "retry-after-delay" }, { id: "ask-agent" }] }
+    }] };
+    expect(matchRunLog(matcher!, run).yes).toBe(true);
+    const immediateRetry = structuredClone(run);
+    immediateRetry.steps[0]!.recovery.options.push({ id: "retry" });
+    expect(matchRunLog(matcher!, immediateRetry).yes).toBe(false);
   });
 
   test("accepts a non-SharePoint target bound to a typed connected resource", () => {

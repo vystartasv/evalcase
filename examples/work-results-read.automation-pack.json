@@ -1,0 +1,32 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "work-results-read-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Read one exact team request result",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "work-item",
+      "bindings": [
+        "workItemId"
+      ]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "work.results",
+        "operation": "work_results",
+        "arguments": {
+          "results": {
+            "$target": "workItemId"
+          }
+        }
+      }
+    ]
+  }
+}

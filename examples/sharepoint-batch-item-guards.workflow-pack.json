@@ -1,0 +1,31 @@
+{
+  "format": "evalcase.workflow-pack",
+  "version": 1,
+  "id": "sharepoint-batch-item-guards-v1",
+  "name": "SharePoint batch item schema guards",
+  "inventory": { "id": "control-plane-sharepoint-mcp-v1", "version": 1 },
+  "trigger": { "type": "manual" },
+  "target": {
+    "type": "connected-integration",
+    "service": "sharepoint",
+    "resourceType": "site",
+    "bindings": ["siteUrl", "listId"]
+  },
+  "cases": [
+    {
+      "id": "batch-create-empty-rejected",
+      "operation": "deployment_list_items_batch_create",
+      "kind": "expected-rejection",
+      "arguments": { "siteUrl": { "$target": "siteUrl" }, "listId": { "$target": "listId" }, "items": [], "confirmed": true },
+      "expect": { "outcome": "error", "phase": "mcp-schema", "assertions": [{ "op": "exists", "path": "/error", "value": true }] }
+    },
+    {
+      "id": "batch-update-empty-rejected",
+      "operation": "deployment_list_items_batch_update",
+      "kind": "expected-rejection",
+      "arguments": { "siteUrl": { "$target": "siteUrl" }, "listId": { "$target": "listId" }, "items": [], "confirmed": true },
+      "expect": { "outcome": "error", "phase": "mcp-schema", "assertions": [{ "op": "exists", "path": "/error", "value": true }] }
+    }
+  ],
+  "cleanup": []
+}

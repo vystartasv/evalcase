@@ -4,11 +4,11 @@
   "id": "control-plane-mcp-v1",
   "source": {
     "repository": "vystartasv/control-plane",
-    "commit": "2f4be91a9cc228196f3b627190550f5b3ab52b9f",
+    "commit": "9c2c4499c9f9a1c1538af24d4f4519add12f1b59",
     "file": "internal/agentapi/actions.json",
     "capturedAt": "2026-11-13",
     "catalog": "connected MCP registry snapshot",
-    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Replay modes are copied where explicitly declared; runtime defaults are repeatable-read for read-only actions and once-uncertain for writes. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use ordinary automation APIs. automation_recovery_decision and deployment_site_uninstall are included but gated from this live evaluation scope."
+    "note": "The 95 action names and base schemas were copied from this commit's internal/agentapi/actions.json, then all schemas and descriptions were synchronized against the current branch working tree. Replay modes are copied where explicitly declared; runtime defaults are repeatable-read for read-only actions and once-uncertain for writes. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use ordinary automation APIs. automation_recovery_decision and deployment_site_uninstall are included but gated from this live evaluation scope."
   },
   "actions": [
     {
@@ -23,7 +23,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -50,7 +50,7 @@
       "query": [
         "results"
       ],
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -437,7 +437,7 @@
     },
     {
       "name": "automation_list",
-      "description": "List workflows, approved connections, subscribers, recent runs and notifications.",
+      "description": "List workflows, approved connections, subscribers, recent runs and notifications. Run records include step-by-step action, status, recovery options and errors; when administrator developer diagnostics are enabled, connected-service failures include sanitized provider codes, messages and request correlation IDs.",
       "path": "/api/automation",
       "method": "GET",
       "readOnly": true,
@@ -447,7 +447,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -462,7 +462,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -562,7 +562,7 @@
           "steps": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 10,
+            "maxItems": 100,
             "items": {
               "oneOf": [
                 {
@@ -697,9 +697,308 @@
                   "required": [
                     "type"
                   ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "integration-action"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "operation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "capture": {
+                      "type": "object",
+                      "maxProperties": 20,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "operation",
+                    "arguments"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "finalize"
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "cleanup": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "steps",
+                    "cleanup"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "condition"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "operator": {
+                      "enum": [
+                        "eq",
+                        "ne",
+                        "gt",
+                        "gte",
+                        "lt",
+                        "lte",
+                        "contains",
+                        "exists",
+                        "==",
+                        "!=",
+                        ">",
+                        ">=",
+                        "<",
+                        "<="
+                      ]
+                    },
+                    "value": {},
+                    "then": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "else": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "path",
+                    "operator"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "repeat"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "count",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "loop"
+                    },
+                    "maxIterations": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "condition": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "operator": {
+                          "enum": [
+                            "eq",
+                            "ne",
+                            "gt",
+                            "gte",
+                            "lt",
+                            "lte",
+                            "contains",
+                            "exists",
+                            "==",
+                            "!=",
+                            ">",
+                            ">=",
+                            "<",
+                            "<="
+                          ]
+                        },
+                        "value": {}
+                      },
+                      "required": [
+                        "path",
+                        "operator"
+                      ]
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "maxIterations",
+                    "condition",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "timeout"
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 300000
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "durationMs",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "delay"
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 300000
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "durationMs"
+                  ]
                 }
               ]
             }
+          },
+          "triggerType": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "event",
+              "manual"
+            ],
+            "description": "Manual workflows run only after an explicit automation_run request and cannot have a schedule or event trigger."
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "connected-integration"
+              },
+              "service": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "resourceType": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "bindings": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 10,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              }
+            },
+            "required": [
+              "type",
+              "service",
+              "resourceType",
+              "bindings"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -726,7 +1025,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -812,7 +1111,7 @@
     },
     {
       "name": "automation_workflow",
-      "description": "Create or edit any workflow expressible by the available capability catalog: inspect automation_list, starter templates and available dependencies first, compose 1\u201310 supported steps, run automation_preview, explain concrete effects and failure recipients, then save paused unless activation is explicitly requested. Report a missing capability clearly; never substitute arbitrary code. Deployment steps require administrator access. Summary steps require server-configured OpenAI credentials and model.",
+      "description": "Create or edit any workflow expressible by the available capability catalog: inspect automation_list, starter templates and available dependencies first, compose up to 100 supported steps with bounded control flow, run automation_preview, explain concrete effects and failure recipients, then save paused unless activation is explicitly requested. Set triggerType to manual for a workflow that can run only after automation_run is explicitly requested; manual workflows never receive a schedule or event trigger. Report a missing capability clearly; never substitute arbitrary code. Deployment steps require administrator access. Summary steps require server-configured OpenAI credentials and model. Connected action steps call the same typed actions available in the agent catalog and require a manual trigger, one connected integration target, and exact run-time confirmation. Inspect automation_list after completion for ordinary per-step results; when developer diagnostics are enabled, API errors include sanitized provider codes, messages and request correlation IDs. Failed steps include action-aware recovery guidance; record a selected next step without implicitly retrying or contacting anyone.",
       "path": "/api/automation",
       "method": "POST",
       "readOnly": false,
@@ -836,6 +1135,15 @@
             "description": "Event trigger type; omit for a schedule.",
             "minLength": 1,
             "maxLength": 120
+          },
+          "triggerType": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "event",
+              "manual"
+            ],
+            "description": "Manual workflows run only after an explicit automation_run request and cannot have a schedule or event trigger."
           },
           "intervalMinutes": {
             "type": "integer",
@@ -864,7 +1172,7 @@
           "steps": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 10,
+            "maxItems": 100,
             "items": {
               "oneOf": [
                 {
@@ -999,6 +1307,258 @@
                   "required": [
                     "type"
                   ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "integration-action"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "operation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "capture": {
+                      "type": "object",
+                      "maxProperties": 20,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "operation",
+                    "arguments"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "finalize"
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "cleanup": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "steps",
+                    "cleanup"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "condition"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "operator": {
+                      "enum": [
+                        "eq",
+                        "ne",
+                        "gt",
+                        "gte",
+                        "lt",
+                        "lte",
+                        "contains",
+                        "exists",
+                        "==",
+                        "!=",
+                        ">",
+                        ">=",
+                        "<",
+                        "<="
+                      ]
+                    },
+                    "value": {},
+                    "then": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "else": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "path",
+                    "operator"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "repeat"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "count",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "loop"
+                    },
+                    "maxIterations": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "condition": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "operator": {
+                          "enum": [
+                            "eq",
+                            "ne",
+                            "gt",
+                            "gte",
+                            "lt",
+                            "lte",
+                            "contains",
+                            "exists",
+                            "==",
+                            "!=",
+                            ">",
+                            ">=",
+                            "<",
+                            "<="
+                          ]
+                        },
+                        "value": {}
+                      },
+                      "required": [
+                        "path",
+                        "operator"
+                      ]
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "maxIterations",
+                    "condition",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "timeout"
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 300000
+                    },
+                    "steps": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "durationMs",
+                    "steps"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "delay"
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 300000
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "durationMs"
+                  ]
                 }
               ]
             }
@@ -1006,6 +1566,44 @@
           "enabled": {
             "type": "boolean",
             "description": "Optional. Set false to save paused; omission preserves current behavior and creates new schedules enabled."
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "connected-integration"
+              },
+              "service": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "resourceType": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "bindings": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 10,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              }
+            },
+            "required": [
+              "type",
+              "service",
+              "resourceType",
+              "bindings"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -1030,14 +1628,39 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "runId": { "type": "string", "minLength": 1, "maxLength": 200 },
-          "position": { "type": "integer", "minimum": 0 },
-          "choice": { "enum": ["inspect-result", "retry", "retry-after-delay", "correct-input", "refresh-etag", "refresh-state", "verify-absence", "ask-agent", "ask-human"] }
+          "runId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "choice": {
+            "enum": [
+              "inspect-result",
+              "retry",
+              "retry-after-delay",
+              "correct-input",
+              "refresh-etag",
+              "refresh-state",
+              "verify-absence",
+              "ask-agent",
+              "ask-human"
+            ]
+          }
         },
-        "required": ["runId", "position", "choice"],
+        "required": [
+          "runId",
+          "position",
+          "choice"
+        ],
         "additionalProperties": false
       },
-      "fixed": { "operation": "recovery-decision" },
+      "fixed": {
+        "operation": "recovery-decision"
+      },
       "adminOnly": true,
       "coverage": "uncovered",
       "livePolicy": "gated-outside-authorized-scope",
@@ -1175,7 +1798,7 @@
     },
     {
       "name": "automation_run",
-      "description": "Queue an enabled scheduled workflow for the next worker cycle. Before running, present its workflow preview side effects and confirm the user requested this run.",
+      "description": "Manually start one enabled workflow through the ordinary automation runner. Connected-action workflows require an administrator to confirm the exact connected service and target in this request. Inspect automation_list for each step's result and recovery guidance; when developer diagnostics are enabled, API errors include sanitized provider codes, messages and request correlation IDs.",
       "path": "/api/automation",
       "method": "POST",
       "readOnly": false,
@@ -1187,6 +1810,46 @@
             "description": "Existing record ID.",
             "minLength": 1,
             "maxLength": 120
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "connected-integration"
+              },
+              "service": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "resourceType": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "bindings": {
+                "type": "object",
+                "minProperties": 1,
+                "maxProperties": 10,
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                }
+              }
+            },
+            "required": [
+              "type",
+              "service",
+              "resourceType",
+              "bindings"
+            ],
+            "additionalProperties": false
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Required only when starting a connected-action workflow; set true after confirming its exact target."
           }
         },
         "required": [
@@ -1239,7 +1902,7 @@
       ],
       "deployOnly": true,
       "coverage": "uncovered",
-      "livePolicy": "read-only"
+      "livePolicy": "gated-outside-authorized-scope"
     },
     {
       "name": "deployment_recycle_bin_assess",
@@ -1272,7 +1935,7 @@
         "cursor"
       ],
       "deployOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -1538,7 +2201,7 @@
     },
     {
       "name": "deployment_list_column_create",
-      "description": "Create one single-line or plain multi-line text, single-choice, number, currency, date-time or Boolean (Yes/No) column on one exact existing SharePoint list. Multi-line text uses a plain-text editor with six visible lines. Choice columns require 1\u201320 distinct values and can optionally allow fill-in values. Number columns can have optional inclusive minimum and maximum values. Currency columns use SharePoint's default currency settings. Date-time columns can use a date-only or date-and-time display format. Boolean columns default to No unless defaultValue is confirmed as true. Set required to true to require a value on new items; it defaults to false. Confirm the exact site, list and complete column definition; inspect the columns before retrying an uncertain result.",
+      "description": "Create one single-line or plain multi-line text, single-choice, number, currency, date-time or Boolean (Yes/No) column on one exact existing SharePoint list. Multi-line text uses a plain-text editor with six visible lines. Choice columns require 1–20 distinct values and can optionally allow fill-in values. Number columns can have optional inclusive minimum and maximum values. Currency columns use SharePoint's default currency settings. Date-time columns can use a date-only or date-and-time display format. Boolean columns default to No unless defaultValue is confirmed as true. Set required to true to require a value on new items; it defaults to false. Confirm the exact site, list and complete column definition; inspect the columns before retrying an uncertain result.",
       "path": "/api/deployments/list-columns",
       "method": "POST",
       "readOnly": false,
@@ -1893,7 +2556,7 @@
     },
     {
       "name": "deployment_list_seed",
-      "description": "Queue creation of one exact-site generic list with up to 20 text columns and 1\u201320 initial rows. Confirm the site, list name, schema and every row. The worker persists the verified list ID before validating all rows and creating any item; each row outcome is stored independently. An uncertain list-create result is never repeated. Use deployment_list_seed_status to inspect progress.",
+      "description": "Queue creation of one exact-site generic list with up to 20 text columns and 1–20 initial rows. Confirm the site, list name, schema and every row. The worker persists the verified list ID before validating all rows and creating any item; each row outcome is stored independently. An uncertain list-create result is never repeated. Use deployment_list_seed_status to inspect progress.",
       "path": "/api/deployments/list-seed",
       "method": "POST",
       "readOnly": false,
@@ -2025,7 +2688,7 @@
     },
     {
       "name": "deployment_list_items",
-      "description": "Read one page of up to 50 items from one exact existing SharePoint site and list, including ETags. Omit fields to read all returned field values, or select 1\u201320 visible column API names from deployment_list_columns. Optionally filter one visible text or choice column with eq, ne or startswith; number or currency with eq, ne, lt, gt, le or ge; boolean with eq or ne; or dateTime columns with eq, ne, lt, gt, le or ge. The returned cursor preserves projection and filter and remains bound to the exact site and list. Content is returned only to a full administrator.",
+      "description": "Read one page of up to 50 items from one exact existing SharePoint site and list, including ETags. Omit fields to read all returned field values, or select 1–20 visible column API names from deployment_list_columns. Optionally filter one visible text or choice column with eq, ne or startswith; number or currency with eq, ne, lt, gt, le or ge; boolean with eq or ne; or dateTime columns with eq, ne, lt, gt, le or ge. The returned cursor preserves projection and filter and remains bound to the exact site and list. Content is returned only to a full administrator.",
       "path": "/api/deployments/list-items",
       "method": "GET",
       "readOnly": true,
@@ -2144,7 +2807,7 @@
     },
     {
       "name": "deployment_list_items_batch_create",
-      "description": "Create 1\u201320 items in one exact SharePoint list after the administrator confirms the site, list and all submitted field values. Required, hidden and read-only column rules are checked before any write. Each result includes its independent status and successful items are read back before success. Batch writes may trigger list workflows; inspect uncertain results before retrying.",
+      "description": "Create 1–20 items in one exact SharePoint list after the administrator confirms the site, list and all submitted field values. Required, hidden and read-only column rules are checked before any write. Each result includes its independent status and successful items are read back before success. Batch writes may trigger list workflows; inspect uncertain results before retrying.",
       "path": "/api/deployments/list-items/batch-create",
       "method": "POST",
       "readOnly": false,
@@ -2186,7 +2849,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",
@@ -2197,7 +2860,7 @@
     },
     {
       "name": "deployment_list_items_batch_update",
-      "description": "Update 1\u201320 distinct items in one exact SharePoint list after the administrator confirms every item ID, current ETag and field map. Required, hidden and read-only column rules are checked before any write. Each successful item is read back and verified. Per-item failures remain independent; inspect uncertain outcomes before retrying.",
+      "description": "Update 1–20 distinct items in one exact SharePoint list after the administrator confirms every item ID, current ETag and field map. Required, hidden and read-only column rules are checked before any write. Each successful item is read back and verified. Per-item failures remain independent; inspect uncertain outcomes before retrying.",
       "path": "/api/deployments/list-items/batch-update",
       "method": "PATCH",
       "readOnly": false,
@@ -2259,7 +2922,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",
@@ -2468,7 +3131,7 @@
     },
     {
       "name": "deployment_upload",
-      "description": "Upload an SPFx .sppkg ZIP package, 4 bytes\u201350 MiB decoded, and its solution ID from the manifest.",
+      "description": "Upload an SPFx .sppkg ZIP package, 4 bytes–50 MiB decoded, and its solution ID from the manifest.",
       "path": "/api/deployments",
       "method": "POST",
       "readOnly": false,
@@ -2504,7 +3167,7 @@
     },
     {
       "name": "deployment_blueprint_save",
-      "description": "Save a blueprint of 1\u201320 pages, at most 60,000 bytes total.",
+      "description": "Save a blueprint of 1–20 pages, at most 60,000 bytes total.",
       "path": "/api/deployments",
       "method": "POST",
       "readOnly": false,
@@ -3125,7 +3788,7 @@
     },
     {
       "name": "sharepoint_status",
-      "description": "Read connection status and capabilities. Microsoft OAuth consent requires human Microsoft sign-in in the portal.",
+      "description": "Read connection status and a capability evidence map with per-operation status, exact scope, reason and verification time. Distinguishes verified access, implemented-but-unverified APIs and unsupported features; a successful read or package deploy never implies unrelated write permission. Microsoft OAuth consent requires human sign-in in the portal.",
       "path": "/api/sharepoint",
       "method": "GET",
       "readOnly": true,
@@ -3632,7 +4295,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -3718,7 +4381,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -3733,7 +4396,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -3937,7 +4600,7 @@
         "required": [],
         "additionalProperties": false
       },
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -4035,7 +4698,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -4069,7 +4732,7 @@
         "subscriber",
         "after"
       ],
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "read-only"
     },
     {
@@ -4116,29 +4779,72 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "packageId": { "type": "string", "format": "uuid" },
-          "siteUrl": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "packageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
           "confirmation": {
             "type": "object",
             "properties": {
-              "connectionVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
-              "packageId": { "type": "string", "format": "uuid" },
-              "packageName": { "type": "string", "minLength": 1, "maxLength": 106 },
-              "solutionId": { "type": "string", "format": "uuid" },
-              "catalog": { "type": "string", "minLength": 1, "maxLength": 2000 },
-              "siteUrl": { "type": "string", "minLength": 1, "maxLength": 2000 }
+              "connectionVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "packageId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "packageName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 106
+              },
+              "solutionId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "catalog": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "siteUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
             },
-            "required": ["connectionVersion", "packageId", "packageName", "solutionId", "catalog", "siteUrl"],
+            "required": [
+              "connectionVersion",
+              "packageId",
+              "packageName",
+              "solutionId",
+              "catalog",
+              "siteUrl"
+            ],
             "additionalProperties": false
           }
         },
-        "required": ["packageId", "siteUrl", "confirmation"],
+        "required": [
+          "packageId",
+          "siteUrl",
+          "confirmation"
+        ],
         "additionalProperties": false
       },
       "adminOnly": true,
       "coverage": "uncovered",
       "livePolicy": "gated-outside-authorized-scope",
-      "resource": { "kind": "sharepoint-installation", "effect": "delete" },
+      "resource": {
+        "kind": "sharepoint-installation",
+        "effect": "delete"
+      },
       "automationReplayMode": "once-delete"
     }
   ],

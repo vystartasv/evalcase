@@ -1,0 +1,74 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "control-plane-readonly-run-v1",
+  "run": {
+    "state": "succeeded",
+    "stepCount": 9
+  },
+  "steps": [
+    {
+      "position": 0,
+      "action": "work_list",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "work_list returned HTTP 200"
+    },
+    {
+      "position": 1,
+      "action": "automation_list",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "automation_list returned HTTP 200"
+    },
+    {
+      "position": 2,
+      "action": "automation_templates",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "automation_templates returned HTTP 200"
+    },
+    {
+      "position": 3,
+      "action": "automation_inbox",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "automation_inbox returned HTTP 200"
+    },
+    {
+      "position": 4,
+      "action": "settings_read",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "settings_read returned HTTP 200"
+    },
+    {
+      "position": 5,
+      "action": "diagnostics_status",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "diagnostics_status returned HTTP 200"
+    },
+    {
+      "position": 6,
+      "action": "diagnostics_export",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "diagnostics_export returned HTTP 200"
+    },
+    {
+      "position": 7,
+      "action": "integrations_list",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "integrations_list returned HTTP 200"
+    },
+    {
+      "position": 8,
+      "action": "agents_list",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "agents_list returned HTTP 200"
+    }
+  ]
+}
