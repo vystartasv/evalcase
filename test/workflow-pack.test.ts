@@ -18,6 +18,26 @@ describe("portable connected-integration packs", () => {
     expect(pack.value?.automation.triggerType).toBe("manual");
   });
 
+  test("validates backend assertions and rejects expected-status steps", async () => {
+    const root = new URL("../", import.meta.url);
+    const [inventoryRaw, packRaw, matcherRaw] = await Promise.all([
+      readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8"),
+      readFile(new URL("examples/sharepoint-list-crud.pack.json", root), "utf8"),
+      readFile(new URL("examples/sharepoint-list-crud.matcher.json", root), "utf8")
+    ]);
+    const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
+    expect(inventory.value).toBeDefined();
+    const packValue = JSON.parse(packRaw);
+    const matcher = JSON.parse(matcherRaw);
+    expect(parseAutomationPack(packValue, inventory.value!, matcher).diagnostics).toEqual([]);
+    const bad = structuredClone(packValue);
+    bad.automation.steps[0].expectStatus = 409;
+    expect(parseAutomationPack(bad, inventory.value!, matcher).diagnostics.some((issue) => issue.code === "AUTOMATION_STEP_FIELD")).toBe(true);
+    const embeddedAssertion = structuredClone(packValue);
+    embeddedAssertion.automation.steps.unshift({ type: "assert", sourceStep: "list.create", assertions: [{ path: "/id", operator: "exists", value: true }] });
+    expect(parseAutomationPack(embeddedAssertion, inventory.value!, matcher).diagnostics.some((issue) => issue.code === "AUTOMATION_ASSERT_SOURCE")).toBe(true);
+  });
+
   test("accepts a non-SharePoint target bound to a typed connected resource", () => {
     const inventory = parseOperationInventory({
       format: "evalcase.mcp-operation-inventory",

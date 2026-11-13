@@ -8,7 +8,7 @@
     "file": "internal/agentapi/actions.json",
     "capturedAt": "2026-11-13",
     "catalog": "connected MCP registry snapshot",
-    "note": "Operation names match the 98 tools exposed in the current connected MCP registry. Schemas and descriptions are copied from the corresponding local action definitions; exposed legacy sharepoint_eval_* wrappers are cataloged as gated, not used. deployment_site_uninstall exists only in the local uncommitted action file and is absent from the connected registry."
+    "note": "Schemas and descriptions are copied from the corresponding local action definitions. Legacy SharePoint evaluation endpoints are omitted because evaluation packs use the ordinary automation APIs. deployment_site_uninstall is absent from this connected registry snapshot."
   },
   "actions": [
     {
@@ -812,7 +812,7 @@
     },
     {
       "name": "automation_workflow",
-      "description": "Create or edit any workflow expressible by the available capability catalog: inspect automation_list, starter templates and available dependencies first, compose 1–10 supported steps, run automation_preview, explain concrete effects and failure recipients, then save paused unless activation is explicitly requested. Report a missing capability clearly; never substitute arbitrary code. Deployment steps require administrator access. Summary steps require server-configured OpenAI credentials and model.",
+      "description": "Create or edit any workflow expressible by the available capability catalog: inspect automation_list, starter templates and available dependencies first, compose 1\u201310 supported steps, run automation_preview, explain concrete effects and failure recipients, then save paused unless activation is explicitly requested. Report a missing capability clearly; never substitute arbitrary code. Deployment steps require administrator access. Summary steps require server-configured OpenAI credentials and model.",
       "path": "/api/automation",
       "method": "POST",
       "readOnly": false,
@@ -1513,7 +1513,7 @@
     },
     {
       "name": "deployment_list_column_create",
-      "description": "Create one single-line or plain multi-line text, single-choice, number, currency, date-time or Boolean (Yes/No) column on one exact existing SharePoint list. Multi-line text uses a plain-text editor with six visible lines. Choice columns require 1–20 distinct values and can optionally allow fill-in values. Number columns can have optional inclusive minimum and maximum values. Currency columns use SharePoint's default currency settings. Date-time columns can use a date-only or date-and-time display format. Boolean columns default to No unless defaultValue is confirmed as true. Set required to true to require a value on new items; it defaults to false. Confirm the exact site, list and complete column definition; inspect the columns before retrying an uncertain result.",
+      "description": "Create one single-line or plain multi-line text, single-choice, number, currency, date-time or Boolean (Yes/No) column on one exact existing SharePoint list. Multi-line text uses a plain-text editor with six visible lines. Choice columns require 1\u201320 distinct values and can optionally allow fill-in values. Number columns can have optional inclusive minimum and maximum values. Currency columns use SharePoint's default currency settings. Date-time columns can use a date-only or date-and-time display format. Boolean columns default to No unless defaultValue is confirmed as true. Set required to true to require a value on new items; it defaults to false. Confirm the exact site, list and complete column definition; inspect the columns before retrying an uncertain result.",
       "path": "/api/deployments/list-columns",
       "method": "POST",
       "readOnly": false,
@@ -1865,7 +1865,7 @@
     },
     {
       "name": "deployment_list_seed",
-      "description": "Queue creation of one exact-site generic list with up to 20 text columns and 1–20 initial rows. Confirm the site, list name, schema and every row. The worker persists the verified list ID before validating all rows and creating any item; each row outcome is stored independently. An uncertain list-create result is never repeated. Use deployment_list_seed_status to inspect progress.",
+      "description": "Queue creation of one exact-site generic list with up to 20 text columns and 1\u201320 initial rows. Confirm the site, list name, schema and every row. The worker persists the verified list ID before validating all rows and creating any item; each row outcome is stored independently. An uncertain list-create result is never repeated. Use deployment_list_seed_status to inspect progress.",
       "path": "/api/deployments/list-seed",
       "method": "POST",
       "readOnly": false,
@@ -1995,7 +1995,7 @@
     },
     {
       "name": "deployment_list_items",
-      "description": "Read one page of up to 50 items from one exact existing SharePoint site and list, including ETags. Omit fields to read all returned field values, or select 1–20 visible column API names from deployment_list_columns. Optionally filter one visible text or choice column with eq, ne or startswith; number or currency with eq, ne, lt, gt, le or ge; boolean with eq or ne; or dateTime columns with eq, ne, lt, gt, le or ge. The returned cursor preserves projection and filter and remains bound to the exact site and list. Content is returned only to a full administrator.",
+      "description": "Read one page of up to 50 items from one exact existing SharePoint site and list, including ETags. Omit fields to read all returned field values, or select 1\u201320 visible column API names from deployment_list_columns. Optionally filter one visible text or choice column with eq, ne or startswith; number or currency with eq, ne, lt, gt, le or ge; boolean with eq or ne; or dateTime columns with eq, ne, lt, gt, le or ge. The returned cursor preserves projection and filter and remains bound to the exact site and list. Content is returned only to a full administrator.",
       "path": "/api/deployments/list-items",
       "method": "GET",
       "readOnly": true,
@@ -2114,7 +2114,7 @@
     },
     {
       "name": "deployment_list_items_batch_create",
-      "description": "Create 1–20 items in one exact SharePoint list after the administrator confirms the site, list and all submitted field values. Required, hidden and read-only column rules are checked before any write. Each result includes its independent status and successful items are read back before success. Batch writes may trigger list workflows; inspect uncertain results before retrying.",
+      "description": "Create 1\u201320 items in one exact SharePoint list after the administrator confirms the site, list and all submitted field values. Required, hidden and read-only column rules are checked before any write. Each result includes its independent status and successful items are read back before success. Batch writes may trigger list workflows; inspect uncertain results before retrying.",
       "path": "/api/deployments/list-items/batch-create",
       "method": "POST",
       "readOnly": false,
@@ -2166,7 +2166,7 @@
     },
     {
       "name": "deployment_list_items_batch_update",
-      "description": "Update 1–20 distinct items in one exact SharePoint list after the administrator confirms every item ID, current ETag and field map. Required, hidden and read-only column rules are checked before any write. Each successful item is read back and verified. Per-item failures remain independent; inspect uncertain outcomes before retrying.",
+      "description": "Update 1\u201320 distinct items in one exact SharePoint list after the administrator confirms every item ID, current ETag and field map. Required, hidden and read-only column rules are checked before any write. Each successful item is read back and verified. Per-item failures remain independent; inspect uncertain outcomes before retrying.",
       "path": "/api/deployments/list-items/batch-update",
       "method": "PATCH",
       "readOnly": false,
@@ -2432,235 +2432,8 @@
       }
     },
     {
-      "name": "sharepoint_eval_packs",
-      "description": "List imported manual SharePoint workflow packs. Importing never runs a workflow.",
-      "path": "/api/deployments/evaluations/packs",
-      "method": "GET",
-      "readOnly": true,
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "required": [],
-        "additionalProperties": false
-      },
-      "adminOnly": true,
-      "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
-    },
-    {
-      "name": "sharepoint_eval_pack_import",
-      "description": "Upload a strict declarative SharePoint workflow pack. Only bounded typed list and item operations plus captured-value assertions are accepted; no code, schedules, notifications, email, API calls or other external effects are supported. Import never runs the workflow.",
-      "path": "/api/deployments/evaluations/packs",
-      "method": "POST",
-      "readOnly": false,
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
-          },
-          "version": {
-            "type": "integer",
-            "const": 1
-          },
-          "workflow": {
-            "type": "object",
-            "properties": {
-              "trigger": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "const": "manual"
-                  }
-                },
-                "required": [
-                  "type"
-                ],
-                "additionalProperties": false
-              },
-              "steps": {
-                "type": "array",
-                "minItems": 9,
-                "maxItems": 20,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 40,
-                      "pattern": "^[A-Za-z0-9_-]+$"
-                    },
-                    "type": {
-                      "enum": [
-                        "sharepoint.list.create",
-                        "sharepoint.list-item.create",
-                        "sharepoint.list-item.read",
-                        "sharepoint.list-item.update",
-                        "sharepoint.list-item.delete",
-                        "assert.equals",
-                        "assert.not-found"
-                      ]
-                    },
-                    "capture": {
-                      "type": "string",
-                      "enum": [
-                        "list",
-                        "item",
-                        "created",
-                        "updated"
-                      ]
-                    },
-                    "item": {
-                      "const": "item"
-                    },
-                    "fields": {
-                      "type": "object",
-                      "properties": {
-                        "Title": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 300
-                        }
-                      },
-                      "required": [
-                        "Title"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "source": {
-                      "enum": [
-                        "created.fields.Title",
-                        "updated.fields.Title"
-                      ]
-                    },
-                    "field": {
-                      "const": "Title"
-                    },
-                    "equals": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 300
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "type"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": [
-              "trigger",
-              "steps"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "name",
-          "version",
-          "workflow"
-        ],
-        "additionalProperties": false
-      },
-      "adminOnly": true,
-      "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
-    },
-    {
-      "name": "sharepoint_eval_pack_export",
-      "description": "Export one exact portable SharePoint evaluation pack by ID.",
-      "path": "/api/deployments/evaluations/packs",
-      "method": "GET",
-      "readOnly": true,
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "packId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "packId"
-        ],
-        "additionalProperties": false
-      },
-      "query": [
-        "packId"
-      ],
-      "adminOnly": true,
-      "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
-    },
-    {
-      "name": "sharepoint_eval_run",
-      "description": "After explicitly confirming one exact connected dev site, manually run its imported declarative SharePoint workflow. The bounded workflow creates one run-owned list and item, checks captured readbacks, updates and deletes the item, confirms not-found, then deletes only its own list. Uncertain outcomes require review. No schedule is created.",
-      "path": "/api/deployments/evaluations/runs",
-      "method": "POST",
-      "readOnly": false,
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "packId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "siteUrl": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2000
-          },
-          "confirmed": {
-            "type": "boolean",
-            "const": true,
-            "description": "Confirm this exact target site and temporary CRUD test writes."
-          }
-        },
-        "required": [
-          "packId",
-          "siteUrl",
-          "confirmed"
-        ],
-        "additionalProperties": false
-      },
-      "adminOnly": true,
-      "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
-    },
-    {
-      "name": "sharepoint_eval_run_read",
-      "description": "Read step results for one exact evaluation run.",
-      "path": "/api/deployments/evaluations/runs",
-      "method": "GET",
-      "readOnly": true,
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "runId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "runId"
-        ],
-        "additionalProperties": false
-      },
-      "query": [
-        "runId"
-      ],
-      "adminOnly": true,
-      "coverage": "uncovered",
-      "livePolicy": "gated-outside-authorized-scope"
-    },
-    {
       "name": "deployment_upload",
-      "description": "Upload an SPFx .sppkg ZIP package, 4 bytes–50 MiB decoded, and its solution ID from the manifest.",
+      "description": "Upload an SPFx .sppkg ZIP package, 4 bytes\u201350 MiB decoded, and its solution ID from the manifest.",
       "path": "/api/deployments",
       "method": "POST",
       "readOnly": false,
@@ -2696,7 +2469,7 @@
     },
     {
       "name": "deployment_blueprint_save",
-      "description": "Save a blueprint of 1–20 pages, at most 60,000 bytes total.",
+      "description": "Save a blueprint of 1\u201320 pages, at most 60,000 bytes total.",
       "path": "/api/deployments",
       "method": "POST",
       "readOnly": false,
