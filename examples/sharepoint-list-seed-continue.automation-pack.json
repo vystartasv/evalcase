@@ -1,0 +1,31 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-list-seed-continue-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Continue untouched rows on one confirmed SharePoint list seed job",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "list-seed-job",
+      "bindings": ["jobId", "siteUrl", "listId"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "seed.continue",
+        "operation": "deployment_list_seed_continue",
+        "arguments": {
+          "jobId": { "$target": "jobId" },
+          "siteUrl": { "$target": "siteUrl" },
+          "listId": { "$target": "listId" },
+          "confirmed": true
+        }
+      }
+    ]
+  }
+}

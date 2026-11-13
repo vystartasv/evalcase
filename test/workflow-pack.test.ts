@@ -39,7 +39,7 @@ describe("portable connected-integration packs", () => {
     const inventory = parseOperationInventory(JSON.parse(inventoryRaw));
     expect(inventory.value).toBeDefined();
     expect(inventory.value!.actions).toHaveLength(95);
-    expect(inventory.value!.actions.filter((action) => action.coverage === "pack-defined-not-live-verified")).toHaveLength(27);
+    expect(inventory.value!.actions.filter((action) => action.coverage === "pack-defined-not-live-verified")).toHaveLength(32);
     for (const name of ["automation_recovery_decision", "deployment_site_uninstall"]) {
       expect(inventory.value!.actions.find((action) => action.name === name)?.livePolicy).toBe("gated-outside-authorized-scope");
     }
@@ -87,6 +87,35 @@ describe("portable connected-integration packs", () => {
     }
   });
 
+  test("validates seed, exact-job status, continuation, and site-create status packs separately", async () => {
+    const root = new URL("../", import.meta.url);
+    const inventory = parseOperationInventory(JSON.parse(await readFile(new URL("catalog/control-plane-mcp-v1.json", root), "utf8")));
+    expect(inventory.value).toBeDefined();
+    const packs = [
+      ["sharepoint-list-seed.automation-pack.json", "sharepoint-list-seed.matcher.json", "deployment_list_seed"],
+      ["sharepoint-list-seed-status.automation-pack.json", "sharepoint-list-seed-status.matcher.json", "deployment_list_seed_status"],
+      ["sharepoint-list-seed-continue.automation-pack.json", "sharepoint-list-seed-continue.matcher.json", "deployment_list_seed_continue"],
+      ["sharepoint-site-create-status.automation-pack.json", "sharepoint-site-create-status.matcher.json", "deployment_site_create_status"],
+      ["sharepoint-site-create.automation-pack.json", "sharepoint-site-create.matcher.json", "deployment_site_create"]
+    ];
+    for (const [packName, matcherName, operation] of packs) {
+      const [packRaw, matcherRaw] = await Promise.all([
+        readFile(new URL(`examples/${packName}`, root), "utf8"),
+        readFile(new URL(`examples/${matcherName}`, root), "utf8")
+      ]);
+      const matcher = parseRunMatcher(JSON.parse(matcherRaw));
+      expect(parseAutomationPack(JSON.parse(packRaw), inventory.value!, JSON.parse(matcherRaw)).diagnostics).toEqual([]);
+      expect(matcher?.steps.map((step) => step.action)).toEqual([operation]);
+      expect(matchRunLog(matcher!, {
+        state: "succeeded",
+        steps: [{ position: 0, action: operation, state: "succeeded", replay_mode: matcher!.steps[0]!.replayMode, message: matcher!.steps[0]!.messageContains }]
+      }).yes).toBe(true);
+      expect(inventory.value!.actions.find((action) => action.name === operation)?.coverage).toBe("pack-defined-not-live-verified");
+    }
+    expect(inventory.value!.actions.find((action) => action.name === "deployment_list_seed_status")?.livePolicy).toBe("gated-outside-authorized-scope");
+    expect(inventory.value!.actions.find((action) => action.name === "deployment_site_create_status")?.livePolicy).toBe("gated-outside-authorized-scope");
+  });
+
   test("defines a schema-only rejection case for every current MCP operation", async () => {
     const root = new URL("../", import.meta.url);
     const [inventoryRaw, packRaw] = await Promise.all([
@@ -103,8 +132,8 @@ describe("portable connected-integration packs", () => {
     const coverage = coverageReport(pack.value!, inventory.value!);
     expect(coverage.filter((item) => item.safeCaseCoverage === "schema-rejection")).toHaveLength(95);
     expect(coverage.filter((item) => item.safeCaseCoverage === "none")).toHaveLength(0);
-    expect(coverage.filter((item) => item.status === "pack-defined-not-live-verified")).toHaveLength(27);
-    expect(coverage.filter((item) => item.status === "schema-guarded")).toHaveLength(2);
+    expect(coverage.filter((item) => item.status === "pack-defined-not-live-verified")).toHaveLength(29);
+    expect(coverage.filter((item) => item.status === "schema-guarded")).toHaveLength(0);
     expect(coverage.filter((item) => item.status === "gated-uncovered")).toHaveLength(37);
     expect(coverage.filter((item) => item.status === "unsafe")).toHaveLength(27);
     expect(coverage.filter((item) => item.status === "one-time-confirmation-required")).toHaveLength(2);

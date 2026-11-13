@@ -2400,7 +2400,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "one-time-confirmed-target-required",
       "resource": {
         "kind": "sharepoint-site",
@@ -2437,7 +2437,7 @@
         "inspect"
       ],
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "gated-outside-authorized-scope"
     },
     {
@@ -2608,7 +2608,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list",
@@ -2637,7 +2637,7 @@
         "jobId"
       ],
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "gated-outside-authorized-scope"
     },
     {
@@ -2677,7 +2677,7 @@
         "additionalProperties": false
       },
       "adminOnly": true,
-      "coverage": "uncovered",
+      "coverage": "pack-defined-not-live-verified",
       "livePolicy": "run-owned-resource-cleanup-required",
       "resource": {
         "kind": "sharepoint-list-item",

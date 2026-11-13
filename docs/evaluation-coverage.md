@@ -2,13 +2,18 @@
 
 Inventory: `control-plane-mcp-v1` v1; 95 actions. Base schemas: `9c2c4499c9f9a1c1538af24d4f4519add12f1b59` in `internal/agentapi/actions.json`; all schema descriptions were synchronized against the current source tree.
 
-Coverage here means local pack definition and validation only. No action has fresh deployed run evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service; this gives all 95 operations safe local case coverage, including operations whose positive calls remain gated. Evalcase reports this separately from positive coverage and live-policy status. A separate batch guard rejects empty create/update arrays. Five read-only APIs now have useful positive calls in ordinary manual automations. Positive SharePoint CRUD remains run-owned and requires cleanup; tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
+Coverage here means local pack definition and validation only. No action has fresh deployed run evidence. The 95-case schema-guard pack checks one unknown-field rejection per action without calling a service; this gives all 95 operations safe local case coverage, including operations whose positive calls remain gated. Evalcase reports this separately from positive coverage and live-policy status. A separate batch guard rejects empty create/update arrays. Positive manual packs now cover all 18 read-only operations and 11 run-owned SharePoint CRUD/seed operations, two exact-job status reads, and the one-time confirmed site create. Seed continuation has a valid positive pack but requires a naturally interrupted job with untouched rows; no fault is injected to manufacture that recovery state. Tenant-wide catalog enumeration and side-effectful provisioning remain gated or not started.
 
 ## Pack-defined positive coverage
 
 | Pack | Positive operations | Status |
 |---|---|---|
 | `sharepoint-list-crud.pack.json` | `deployment_list_changes`, `deployment_site_lists`, `deployment_site_list_create`, `deployment_site_list_rename`, `deployment_site_list_delete`, `deployment_list_columns`, `deployment_list_column_create`, `deployment_list_items`, `deployment_list_items_batch`, `deployment_list_items_batch_create`, `deployment_list_items_batch_update`, `deployment_list_item_read`, `deployment_list_item_create`, `deployment_list_item_update`, `deployment_list_item_delete` | locally validated; not live-verified |
+| `sharepoint-list-seed.automation-pack.json` | `deployment_list_seed` | locally validated; temporary list and row require cleanup; not live-verified |
+| `sharepoint-list-seed-status.automation-pack.json` | `deployment_list_seed_status` | locally validated; exact job ID only; remains gated for unrelated jobs; not live-verified |
+| `sharepoint-list-seed-continue.automation-pack.json` | `deployment_list_seed_continue` | locally validated; exact job/site/list target; positive live run requires naturally pending untouched rows; not live-verified |
+| `sharepoint-site-create-status.automation-pack.json` | `deployment_site_create_status` | locally validated; exact job ID only; remains gated for unrelated jobs; not live-verified |
+| `sharepoint-site-create.automation-pack.json` | `deployment_site_create` | locally validated; one-time exact URL/title/owner confirmation; not live-verified |
 | `sharepoint-site-read.automation-pack.json` | `deployment_site_lists`, `deployment_recycle_bin_assess` | locally validated; exact-site target; not live-verified |
 | `control-plane-readonly.automation-pack.json` | `work_list`, `automation_list`, `automation_templates`, `automation_inbox`, `settings_read`, `diagnostics_status`, `diagnostics_export`, `integrations_list`, `agents_list` | locally validated; service-scope target; not live-verified |
 | `work-results-read.automation-pack.json` | `work_results` | locally validated; exact work-item target; not live-verified |
@@ -43,8 +48,8 @@ Coverage here means local pack definition and validation only. No action has fre
 - `deployment_site_list_rename` — pack-defined-not-live-verified; update sharepoint-list
 - `deployment_site_list_delete` — pack-defined-not-live-verified; delete sharepoint-list
 - `deployment_list_column_create` — pack-defined-not-live-verified; create sharepoint-column
-- `deployment_list_seed` — uncovered; create sharepoint-list
-- `deployment_list_seed_continue` — uncovered; create sharepoint-list-item
+- `deployment_list_seed` — pack-defined-not-live-verified; create sharepoint-list
+- `deployment_list_seed_continue` — pack-defined-not-live-verified; continue untouched rows on a saved list-seed job
 - `deployment_list_items_batch_create` — pack-defined-not-live-verified; create sharepoint-list-item
 - `deployment_list_items_batch_update` — pack-defined-not-live-verified; update sharepoint-list-item
 - `deployment_list_item_create` — pack-defined-not-live-verified; create sharepoint-list-item
@@ -53,7 +58,7 @@ Coverage here means local pack definition and validation only. No action has fre
 
 ### one-time-confirmed-target-required (2)
 
-- `deployment_site_create` — uncovered; create sharepoint-site
+- `deployment_site_create` — pack-defined-not-live-verified; create sharepoint-site; one-time exact confirmation
 - `deployment_site_create_continue` — uncovered; update sharepoint-site
 
 ### gated-outside-authorized-scope (37)
@@ -61,8 +66,8 @@ Coverage here means local pack definition and validation only. No action has fre
 - `automation_recovery_decision` — uncovered
 - `deployment_list` — uncovered
 - `deployment_site_catalogs` — uncovered
-- `deployment_site_create_status` — uncovered
-- `deployment_list_seed_status` — uncovered
+- `deployment_site_create_status` — pack-defined-not-live-verified; exact job ID only
+- `deployment_list_seed_status` — pack-defined-not-live-verified; exact job ID only
 - `deployment_upload` — uncovered
 - `deployment_blueprint_save` — uncovered
 - `deployment_blueprint_plan` — uncovered
@@ -129,9 +134,12 @@ Coverage here means local pack definition and validation only. No action has fre
 ## Evidence limits
 
 - Safe local case coverage: 95/95 operations have a schema-rejection case; this does not count as positive or live coverage.
-- Positive local pack definitions: 27 operations.
+- Positive local pack definitions: 32 operations; this does not mean all 95 operations are positive or live-tested.
 - Live-verified operations: 0.
-- Two safe/run-owned operations still have schema-rejection coverage only: `deployment_list_seed` and `deployment_list_seed_continue`; no positive seed job or cleanup pack is defined.
+- `deployment_site_create` has a positive one-time pack, but its unique dedicated dev-site creation still requires the deployed workflow and exact target confirmation.
+- `deployment_list_seed` has a positive manual pack; its fresh-site run and exact-list cleanup are pending deployment confirmation.
+- `deployment_list_seed_continue` has a positive manual pack, but a live success requires an untouched pending row left by a genuine interrupted job. No such job is available, and no interruption will be manufactured.
+- Exact-job reads for `deployment_list_seed_status` and `deployment_site_create_status` have positive manual packs; their broader live policies remain gated.
 - Tenant-wide app-catalog enumeration (`deployment_site_catalogs`) is gated under the no-app-catalog boundary.
 - All nine standard starter templates have structural tests. The service-scope pack reads the template catalog, but no template with external schedule, email, event, or AI effects has run evidence.
 - Live run authorization requires all local corrections and validations complete, a new deployment at the exact reviewed SHA, and one fresh dedicated WorksWithAgents dev site. No existing failed site job is reusable.

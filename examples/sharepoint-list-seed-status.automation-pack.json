@@ -1,0 +1,27 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-list-seed-status-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Read one exact SharePoint list seed job",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "control-plane",
+      "resourceType": "list-seed-job",
+      "bindings": ["jobId"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "seed.status",
+        "operation": "deployment_list_seed_status",
+        "arguments": { "jobId": { "$target": "jobId" } },
+        "capture": { "state": "/state", "listId": "/listId" }
+      }
+    ]
+  }
+}

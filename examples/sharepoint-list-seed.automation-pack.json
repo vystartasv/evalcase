@@ -1,0 +1,33 @@
+{
+  "format": "evalcase.automation-pack",
+  "version": 1,
+  "id": "sharepoint-list-seed-v1",
+  "automation": {
+    "operation": "workflow",
+    "name": "Seed one temporary SharePoint list",
+    "action": "steps",
+    "triggerType": "manual",
+    "enabled": true,
+    "target": {
+      "type": "connected-integration",
+      "service": "sharepoint",
+      "resourceType": "site",
+      "bindings": ["siteUrl"]
+    },
+    "steps": [
+      {
+        "type": "integration-action",
+        "id": "seed.create",
+        "operation": "deployment_list_seed",
+        "arguments": {
+          "siteUrl": { "$target": "siteUrl" },
+          "displayName": { "$run": "uniqueListName" },
+          "columns": ["EvalcaseSeedText"],
+          "items": [{ "Title": "Evalcase seed item", "EvalcaseSeedText": "temporary seed evidence" }],
+          "confirmed": true
+        },
+        "capture": { "jobId": "/id" }
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "format": "evalcase.automation-run-matcher",
+  "version": 1,
+  "id": "sharepoint-site-create-status-run-v1",
+  "run": { "state": "succeeded", "stepCount": 1 },
+  "steps": [
+    {
+      "position": 0,
+      "action": "deployment_site_create_status",
+      "state": "succeeded",
+      "replayMode": "repeatable-read",
+      "messageContains": "deployment_site_create_status returned HTTP 200"
+    }
+  ]
+}
